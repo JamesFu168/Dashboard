@@ -15,8 +15,8 @@ public sealed record CardDto(
     DateOnly? DueDate,
     int SequenceOrder,
     string? DevOpsUrl,
-    DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt,
+    DateTime CreatedAt,
+    DateTime UpdatedAt,
     IReadOnlyCollection<CardTaskDto> Tasks);
 
 public sealed record CardTaskDto(
@@ -29,8 +29,8 @@ public sealed record CardTaskDto(
     int SequenceOrder,
     DateOnly? DueDate,
     string? DevOpsUrl,
-    DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTime CreatedAt,
+    DateTime UpdatedAt);
 
 public sealed record CreateCardRequest(
     string Title,
@@ -48,9 +48,9 @@ public sealed record UpdateCardRequest(
     int? DepartmentId,
     DateOnly? DueDate,
     string? DevOpsUrl,
-    DateTimeOffset? UpdatedAt);
+    DateTime? UpdatedAt);
 
-public sealed record MoveCardRequest(CardStatus Status, int SequenceOrder, DateTimeOffset? UpdatedAt);
+public sealed record MoveCardRequest(CardStatus Status, int SequenceOrder, DateTime? UpdatedAt);
 
 public sealed record CreateTaskRequest(
     string Title,
@@ -64,6 +64,6 @@ public sealed record UpdateTaskRequest(
     int? SequenceOrder,
     DateOnly? DueDate,
     string? DevOpsUrl,
-    DateTimeOffset? UpdatedAt);
+    DateTime? UpdatedAt);
 
-public sealed record AssignTaskRequest(int? AssigneeId, DateTimeOffset? UpdatedAt);
+public sealed record AssignTaskRequest(int? AssigneeId, DateTime? UpdatedAt);

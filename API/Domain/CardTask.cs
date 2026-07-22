@@ -10,8 +10,8 @@ public sealed class CardTask
     public int SequenceOrder { get; set; }
     public DateOnly? DueDate { get; set; }
     public string? DevOpsUrl { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public Card? Card { get; set; }
     public User? Assignee { get; set; }

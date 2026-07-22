@@ -35,7 +35,7 @@ public sealed class TasksController(
             return BadRequest("Title is required.");
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeProvider.TaiwanNow;
         var task = new CardTask
         {
             Id = Guid.NewGuid(),
@@ -107,7 +107,7 @@ public sealed class TasksController(
         task.SequenceOrder = request.SequenceOrder ?? task.SequenceOrder;
         task.DueDate = request.DueDate ?? task.DueDate;
         task.DevOpsUrl = request.DevOpsUrl ?? task.DevOpsUrl;
-        task.UpdatedAt = DateTimeOffset.UtcNow;
+        task.UpdatedAt = DateTimeProvider.TaiwanNow;
         card.UpdatedAt = task.UpdatedAt;
 
         await db.SaveChangesAsync();
@@ -132,7 +132,7 @@ public sealed class TasksController(
         }
 
         task.IsCompleted = !task.IsCompleted;
-        task.UpdatedAt = DateTimeOffset.UtcNow;
+        task.UpdatedAt = DateTimeProvider.TaiwanNow;
         card.UpdatedAt = task.UpdatedAt;
 
         await db.SaveChangesAsync();
@@ -162,7 +162,7 @@ public sealed class TasksController(
         }
 
         task.AssigneeId = request.AssigneeId;
-        task.UpdatedAt = DateTimeOffset.UtcNow;
+        task.UpdatedAt = DateTimeProvider.TaiwanNow;
         card.UpdatedAt = task.UpdatedAt;
 
         await db.SaveChangesAsync();
@@ -187,7 +187,7 @@ public sealed class TasksController(
         }
 
         db.CardTasks.Remove(task);
-        card.UpdatedAt = DateTimeOffset.UtcNow;
+        card.UpdatedAt = DateTimeProvider.TaiwanNow;
         await db.SaveChangesAsync();
         await PublishAsync("TaskUpdated", card.Id);
 
@@ -219,7 +219,7 @@ public sealed class TasksController(
                     || card.Tasks.Any(task => task.AssigneeId == currentUser.UserId)));
     }
 
-    private static bool IsStale(DateTimeOffset? requestUpdatedAt, DateTimeOffset entityUpdatedAt)
+    private static bool IsStale(DateTime? requestUpdatedAt, DateTime entityUpdatedAt)
     {
         return requestUpdatedAt is not null && requestUpdatedAt.Value != entityUpdatedAt;
     }

@@ -58,7 +58,7 @@ public sealed class CardsController(
             return BadRequest("Title is required.");
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeProvider.TaiwanNow;
         var card = new Card
         {
             Id = Guid.NewGuid(),
@@ -120,7 +120,7 @@ public sealed class CardsController(
             : null;
         card.DueDate = request.DueDate ?? card.DueDate;
         card.DevOpsUrl = request.DevOpsUrl ?? card.DevOpsUrl;
-        card.UpdatedAt = DateTimeOffset.UtcNow;
+        card.UpdatedAt = DateTimeProvider.TaiwanNow;
 
         await db.SaveChangesAsync();
         await PublishAsync("CardUpdated", card);
@@ -149,7 +149,7 @@ public sealed class CardsController(
 
         card.Status = request.Status;
         card.SequenceOrder = request.SequenceOrder;
-        card.UpdatedAt = DateTimeOffset.UtcNow;
+        card.UpdatedAt = DateTimeProvider.TaiwanNow;
 
         await db.SaveChangesAsync();
         await PublishAsync("CardMoved", card);
@@ -196,7 +196,7 @@ public sealed class CardsController(
                     || card.Tasks.Any(task => task.AssigneeId == currentUser.UserId)));
     }
 
-    private static bool IsStale(DateTimeOffset? requestUpdatedAt, DateTimeOffset entityUpdatedAt)
+    private static bool IsStale(DateTime? requestUpdatedAt, DateTime entityUpdatedAt)
     {
         return requestUpdatedAt is not null && requestUpdatedAt.Value != entityUpdatedAt;
     }

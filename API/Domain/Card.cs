@@ -12,8 +12,8 @@ public sealed class Card
     public DateOnly? DueDate { get; set; }
     public int SequenceOrder { get; set; }
     public string? DevOpsUrl { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public User? Owner { get; set; }
     public Department? Department { get; set; }

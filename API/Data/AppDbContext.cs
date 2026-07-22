@@ -9,6 +9,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Card> Cards => Set<Card>();
     public DbSet<CardTask> CardTasks => Set<CardTask>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -76,6 +77,21 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("REFRESH_TOKENS");
+            entity.HasKey(rt => rt.Id);
+            entity.Property(rt => rt.Token).HasMaxLength(512).IsRequired();
+            entity.Property(rt => rt.ExpiresAt).IsRequired();
+            entity.Property(rt => rt.CreatedAt).HasPrecision(3).IsRequired();
+            entity.Property(rt => rt.IsRevoked).IsRequired();
+            entity.HasIndex(rt => rt.Token).IsUnique();
+            entity.HasOne(rt => rt.User)
+                .WithMany()
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         SeedData(modelBuilder);
     }
 
@@ -87,7 +103,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         var assigneeId = 2;
         var personalCardId = Guid.Parse("10000000-0000-0000-0000-000000000001");
         var orgCardId = Guid.Parse("10000000-0000-0000-0000-000000000002");
-        var createdAt = new DateTimeOffset(2026, 7, 22, 8, 0, 0, TimeSpan.Zero);
+        var createdAt = new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Unspecified);
 
         modelBuilder.Entity<Department>().HasData(
             new Department { Id = engineeringId, Name = "Engineering" },
