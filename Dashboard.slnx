@@ -3,6 +3,9 @@
     <Project Path="API/Dashboard.Api.csproj" />
   </Folder>
   <Folder Name="/DB/">
-    <Project Path="DB/Dashboard.Database.sqlproj" />
+    <Project Path="DB/Dashboard.Database.sqlproj" Id="f706b623-eac5-4764-ba6d-397a0782ca01">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
 </Solution>
