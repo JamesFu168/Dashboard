@@ -30,12 +30,43 @@ h1 {
   font-size: 32px;
 }
 
+.header-actions {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+
 .view-switch {
   background: #e5eaf1;
   border: 1px solid #d5dde8;
   border-radius: 8px;
   display: flex;
   padding: 4px;
+}
+
+.user-menu {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.user-name {
+  color: #1d2a3a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.logout-button {
+  background: #ffffff;
+  border: 1px solid #d5dde8;
+  border-radius: 8px;
+  color: #526277;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+.logout-button:hover {
+  background: #f3f6fa;
 }
 
 .view-switch button {
@@ -175,6 +206,12 @@ time {
     align-items: flex-start;
     flex-direction: column;
     gap: 14px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .columns {

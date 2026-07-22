@@ -5,13 +5,20 @@
       <h1>Work board</h1>
     </div>
 
-    <div class="view-switch" aria-label="View mode">
-      <button type="button" [class.active]="state.viewMode() === 'personal'" (click)="setViewMode('personal')">
-        Personal
-      </button>
-      <button type="button" [class.active]="state.viewMode() === 'organization'" (click)="setViewMode('organization')">
-        Organization
-      </button>
+    <div class="header-actions">
+      <div class="view-switch" aria-label="View mode">
+        <button type="button" [class.active]="state.viewMode() === 'personal'" (click)="setViewMode('personal')">
+          Personal
+        </button>
+        <button type="button" [class.active]="state.viewMode() === 'organization'" (click)="setViewMode('organization')">
+          Organization
+        </button>
+      </div>
+
+      <div class="user-menu">
+        <span class="user-name">{{ auth.user()?.name }}</span>
+        <button type="button" class="logout-button" (click)="logout()">Logout</button>
+      </div>
     </div>
   </header>
 

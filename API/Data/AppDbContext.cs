@@ -109,9 +109,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             new Department { Id = engineeringId, Name = "Engineering" },
             new Department { Id = productId, Name = "Product" });
 
+        // BCrypt hash of the seed password "Passw0rd!" for local/dev login testing.
+        const string seedPasswordHash = "$2b$10$ucv6PQN2oV/TVOsyYpXKhOrPNJd4Pq4MDGdm6VzK4tHfS6kVUkAza";
+
         modelBuilder.Entity<User>().HasData(
-            new User { Id = ownerId, Name = "Alex Owner", Email = "alex@example.com", PasswordHash = "SEED_PASSWORD_HASH_REPLACE_BEFORE_USE", DepartmentId = engineeringId, Role = "Owner" },
-            new User { Id = assigneeId, Name = "Sam Assignee", Email = "sam@example.com", PasswordHash = "SEED_PASSWORD_HASH_REPLACE_BEFORE_USE", DepartmentId = engineeringId, Role = "Member" });
+            new User { Id = ownerId, Name = "Alex Owner", Email = "alex@example.com", PasswordHash = seedPasswordHash, DepartmentId = engineeringId, Role = "Owner" },
+            new User { Id = assigneeId, Name = "Sam Assignee", Email = "sam@example.com", PasswordHash = seedPasswordHash, DepartmentId = engineeringId, Role = "Member" });
 
         modelBuilder.Entity<Card>().HasData(
             new Card

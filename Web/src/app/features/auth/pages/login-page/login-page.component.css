@@ -1,0 +1,79 @@
+.login-shell {
+  align-items: center;
+  background: #edf1f5;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.login-card {
+  background: #ffffff;
+  border: 1px solid #d9e1ea;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+  display: grid;
+  gap: 16px;
+  max-width: 360px;
+  padding: 32px;
+  width: 100%;
+}
+
+.eyebrow {
+  color: #60738f;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #364152;
+}
+
+.field input {
+  border: 1px solid #d5dde8;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.field input:focus {
+  border-color: #6f8bff;
+  outline: none;
+}
+
+.error {
+  background: #fdecec;
+  border: 1px solid #f3b9b9;
+  border-radius: 8px;
+  color: #a02525;
+  font-size: 13px;
+  margin: 0;
+  padding: 8px 12px;
+}
+
+button[type='submit'] {
+  background: #1d2a3a;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 14px;
+}
+
+button[type='submit']:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

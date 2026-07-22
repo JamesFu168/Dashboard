@@ -2,10 +2,11 @@ INSERT INTO [DEPARTMENTS] ([Id], [Name])
 VALUES (1, N'Engineering'), (2, N'Product');
 ALTER SEQUENCE [dbo].[DepartmentIdSequence] RESTART WITH 3;
 
+-- PasswordHash below is the BCrypt hash of the seed password "Passw0rd!" for local/dev login testing.
 INSERT INTO [USERS] ([Id], [Name], [Email], [PasswordHash], [DepartmentId], [Role])
 VALUES
-    (1, N'Alex Owner', N'alex@example.com', N'SEED_PASSWORD_HASH_REPLACE_BEFORE_USE', 1, N'Owner'),
-    (2, N'Sam Assignee', N'sam@example.com', N'SEED_PASSWORD_HASH_REPLACE_BEFORE_USE', 1, N'Member');
+    (1, N'Alex Owner', N'alex@example.com', N'$2b$10$ucv6PQN2oV/TVOsyYpXKhOrPNJd4Pq4MDGdm6VzK4tHfS6kVUkAza', 1, N'Owner'),
+    (2, N'Sam Assignee', N'sam@example.com', N'$2b$10$ucv6PQN2oV/TVOsyYpXKhOrPNJd4Pq4MDGdm6VzK4tHfS6kVUkAza', 1, N'Member');
 ALTER SEQUENCE [dbo].[UserIdSequence] RESTART WITH 3;
 
 INSERT INTO [CARDS] (

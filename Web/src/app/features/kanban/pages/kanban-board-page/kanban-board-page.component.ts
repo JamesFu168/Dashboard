@@ -1,6 +1,8 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthStateService } from '../../../auth/services/auth-state.service';
 import { CardStatus, CardTask, KanbanCard } from '../../models/kanban.models';
 import { KanbanRealtimeService } from '../../services/kanban-realtime.service';
 import { KanbanStateService } from '../../services/kanban-state.service';
@@ -14,12 +16,13 @@ import { KanbanStateService } from '../../services/kanban-state.service';
 })
 export class KanbanBoardPageComponent implements OnInit {
   protected readonly state = inject(KanbanStateService);
+  protected readonly auth = inject(AuthStateService);
   private readonly realtime = inject(KanbanRealtimeService);
-  private readonly currentUserId = 1;
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.state.load('personal');
-    void this.realtime.connect();
+    void this.realtime.connect(this.auth.user()?.departmentId ?? 1);
   }
 
   setViewMode(viewMode: 'personal' | 'organization'): void {
@@ -27,11 +30,16 @@ export class KanbanBoardPageComponent implements OnInit {
   }
 
   isOwner(card: KanbanCard): boolean {
-    return card.ownerId === this.currentUserId;
+    return card.ownerId === this.auth.user()?.userId;
   }
 
   canToggleTask(card: KanbanCard, task: CardTask): boolean {
-    return this.isOwner(card) || task.assigneeId === this.currentUserId;
+    return this.isOwner(card) || task.assigneeId === this.auth.user()?.userId;
+  }
+
+  logout(): void {
+    this.auth.logout();
+    void this.router.navigateByUrl('/login');
   }
 
   drop(event: CdkDragDrop<KanbanCard[]>, status: CardStatus): void {
