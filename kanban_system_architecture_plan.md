@@ -50,10 +50,13 @@ erDiagram
     DEPARTMENTS ||--o{ CARDS : scoped_to
     CARDS ||--|{ CARD_TASKS : contains
 
+    USERS ||--o{ REFRESH_TOKENS : issues
+
     USERS {
         Id int PK
         Name string
         Email string
+        PasswordHash string "BCrypt 雜湊，不儲存明碼"
         DepartmentId int FK
         Role string
     }
@@ -61,6 +64,15 @@ erDiagram
     DEPARTMENTS {
         Id int PK
         Name string
+    }
+
+    REFRESH_TOKENS {
+        Id guid PK
+        UserId int FK
+        Token string
+        ExpiresAt datetime
+        CreatedAt datetime
+        IsRevoked boolean
     }
 
     CARDS {
@@ -93,6 +105,9 @@ erDiagram
 ```
 
 ### 資料表欄位重點說明
+- **Users.PasswordHash**: 密碼一律以 BCrypt 雜湊後儲存，登入時使用 `BCrypt.Verify` 比對，資料庫與程式中皆不出現明碼。
+- **RefreshTokens**: 每次登入/換發 Token 皆會產生一筆新記錄；`IsRevoked` 於登出或換發新 Token 時標記為 `true`，用於單向撤銷舊 Token。
+- **所有時間戳記欄位 (`CreatedAt` / `UpdatedAt` / `ExpiresAt`)**: 統一透過後端 `DateTimeProvider.TaiwanNow` 取得台灣時間 (UTC+8)，不使用資料庫或伺服器預設 UTC 時間，確保前後端顯示與比對一致。
 - **Cards.Scope**: 0 代表 `Personal` (個人)，1 代表 `Organization` (組織/部門)。
 - **Cards.OwnerId**: 建立卡片的使用者，唯一具備**跨欄位移動該卡片**權限的人。
 - **Cards.DueDate / CardTasks.DueDate**: 僅需記錄日期，不記錄時間，資料庫型態建議使用 `date`。
@@ -120,6 +135,11 @@ erDiagram
 ### 4.1 核心 Controller API Endpoints
 
 ```
+[Auth Endpoints]
+POST   /api/v1/auth/login                                # Email + 密碼登入 (BCrypt 驗證)，成功回傳 AccessToken(15分鐘) + RefreshToken(7天)
+POST   /api/v1/auth/refresh                              # 以 RefreshToken 換發新的 AccessToken，並撤銷舊的 RefreshToken
+POST   /api/v1/auth/logout                                # 撤銷指定的 RefreshToken
+
 [Card Endpoints]
 GET    /api/v1/cards?viewMode={personal|organization}   # 取得當前使用者權限允許查看的看板卡片
 GET    /api/v1/cards/{id}                               # 取得單一卡片詳細資料與 Tasks
@@ -139,19 +159,42 @@ DELETE /api/v1/tasks/{taskId}                           # 刪除 Task (僅限 Ca
 ### 4.2 API Request DTO 範例
 
 ```jsonc
+// POST /api/v1/auth/login
+{
+  "email": "user@example.com",
+  "password": "P@ssw0rd"
+}
+// -> 200 OK
+{
+  "accessToken": "eyJhbGciOi...",
+  "refreshToken": "base64-random-token",
+  "userId": 1,
+  "name": "王小明",
+  "email": "user@example.com",
+  "role": "Member",
+  "departmentId": 1
+}
+
+// POST /api/v1/auth/refresh、POST /api/v1/auth/logout
+{
+  "refreshToken": "base64-random-token"
+}
+
 // PATCH /api/v1/cards/{id}
 {
   "title": "更新後標題",
   "description": "更新後說明",
   "dueDate": "2026-08-15",
   "scope": 1,
-  "devOpsUrl": "https://dev.azure.com/org/project/_workitems/edit/12345"
+  "devOpsUrl": "https://dev.azure.com/org/project/_workitems/edit/12345",
+  "updatedAt": "2026-07-20T10:00:00+08:00"
 }
 
 // PUT /api/v1/cards/{id}/status
 {
   "status": 2,
-  "sequenceOrder": 300
+  "sequenceOrder": 300,
+  "updatedAt": "2026-07-20T10:00:00+08:00"
 }
 
 // PATCH /api/v1/tasks/{taskId}
@@ -159,47 +202,53 @@ DELETE /api/v1/tasks/{taskId}                           # 刪除 Task (僅限 Ca
   "title": "更新 Task 標題",
   "dueDate": "2026-08-16",
   "sequenceOrder": 100,
-  "devOpsUrl": "https://dev.azure.com/org/project/_workitems/edit/67890"
+  "devOpsUrl": "https://dev.azure.com/org/project/_workitems/edit/67890",
+  "updatedAt": "2026-07-20T10:00:00+08:00"
 }
 ```
+
+> `updatedAt` 為樂觀鎖比對欄位：若請求帶入的 `updatedAt` 與資料庫目前值不一致，API 回傳 `409 Conflict`（詳見 4.3）。
 
 ### 4.3 API 錯誤處理標準
 
 - **400 Bad Request**: Request body 格式錯誤、欄位驗證失敗，或 `Status` / `Scope` 超出 Enum 定義。
-- **401 Unauthorized**: 未登入或 JWT 無效。
-- **403 Forbidden**: 已登入但不具備操作權限，例如非 Owner 嘗試移動卡片。
-- **404 Not Found**: 卡片、Task 或指派使用者不存在，或目前使用者無權存取該資源。
+- **401 Unauthorized**: 未登入、JWT 無效/過期，或登入時 Email/密碼錯誤、`refresh`/`logout` 時 RefreshToken 無效或已過期/撤銷。
+- **403 Forbidden**: 已登入但不具備操作權限，包含：
+  - 非 Owner 嘗試編輯/移動/刪除卡片，或非 Owner 嘗試新增/編輯/指派/刪除 Task。
+  - 非 Owner 且非 Task Assignee、也非同部門成員檢視卡片/Task 詳情（`GET /cards/{id}`、`GET /tasks/{taskId}`）。
+- **404 Not Found**: 卡片、Task 或指派使用者不存在（純粹資源不存在，與權限判斷無關）。
 - **409 Conflict**: 多人同時編輯造成 `UpdatedAt` 版本衝突，前端需重新取得最新資料後再送出。
 
 ### 4.4 .NET 10 權限邏輯 (Policy / Domain Service) 範例
 
 ```csharp
-public class CardAuthorizationService
+public sealed class CardAuthorizationService
 {
-    // 判斷是否具備移動卡片的權限 (僅 Owner)
-    public bool CanUserMoveCard(int currentUserId, Card card)
-    {
-        return card.OwnerId == currentUserId;
-    }
+    // 判斷是否具備編輯卡片內容的權限 (僅 Owner)
+    public bool CanEditCard(int currentUserId, Card card) => card.OwnerId == currentUserId;
+
+    // 判斷是否具備移動卡片狀態的權限 (僅 Owner)
+    public bool CanMoveCard(int currentUserId, Card card) => card.OwnerId == currentUserId;
+
+    // 判斷是否具備新增/編輯/指派/刪除 Task 的權限 (僅 Owner)
+    public bool CanManageTasks(int currentUserId, Card card) => card.OwnerId == currentUserId;
 
     // 判斷是否具備更新 Task 完成狀態的權限 (Owner 或 Task Assignee)
-    public bool CanUserToggleTask(int currentUserId, CardTask task, Card card)
+    public bool CanToggleTask(int currentUserId, CardTask task, Card card)
     {
         return card.OwnerId == currentUserId || task.AssigneeId == currentUserId;
     }
 
     // 取得使用者可看見的卡片列表 (LINQ Query Filter)
-    public IQueryable<Card> GetAccessibleCardsQuery(AppDbContext db, int userId, int userDeptId, string viewMode)
+    public IQueryable<Card> GetAccessibleCardsQuery(AppDbContext db, int userId, int userDeptId, string? viewMode)
     {
-        if (viewMode == "personal")
+        if (string.Equals(viewMode, "organization", StringComparison.OrdinalIgnoreCase))
         {
-            return db.Cards.Where(c => c.OwnerId == userId && c.Scope == CardScope.Personal);
-        }
-        else // organization
-        {
-            return db.Cards.Where(c => c.Scope == CardScope.Organization && 
+            return db.Cards.Where(c => c.Scope == CardScope.Organization &&
                 (c.DepartmentId == userDeptId || c.Tasks.Any(t => t.AssigneeId == userId)));
         }
+
+        return db.Cards.Where(c => c.OwnerId == userId && c.Scope == CardScope.Personal);
     }
 }
 ```
@@ -213,6 +262,10 @@ public class CardAuthorizationService
 | `CardMoved` | 卡片 Status 或 SequenceOrder 變更成功 | 所有可檢視該卡片的使用者 |
 | `CardDeleted` | 刪除卡片成功 | 所有原本可檢視該卡片的使用者 |
 | `TaskUpdated` | 新增、編輯、刪除、指派或勾選 Task 成功 | 所有可檢視該卡片的使用者 |
+
+**廣播機制實作細節**：
+- `KanbanHub` 提供 `JoinDepartmentGroup(departmentId)` / `LeaveDepartmentGroup(departmentId)` 方法，前端連線後依使用者所屬部門加入對應的 SignalR Group，Group 命名規則為 `department:{departmentId}`。
+- 後端事件發送時，同時對「卡片 Owner」（透過 `Clients.User(ownerId)`，需 JWT 帶入 `NameIdentifier` claim 作為使用者識別）與「卡片所屬部門 Group」（當 `Scope = Organization`）廣播，確保 Owner 與同部門成員都能即時收到更新。
 
 ---
 
@@ -279,7 +332,8 @@ app/
 1. **第一階段：Database & API Core (1-2 週)**
    - 建立 Azure SQL Database 資源並使用 EF Core Migration 建置 Schema。
    - 建立 Card / Task 的 `DueDate`、`SequenceOrder`、`DevOpsUrl`、`UpdatedAt` 欄位。
-   - 撰寫 Card & Task 的 CRUD API 與 JWT Authentication。
+   - 撰寫 Card & Task 的 CRUD API 與 JWT Authentication（Access Token + Refresh Token，密碼以 BCrypt 雜湊）。
+   - 設定 CORS 政策，並以 .NET 10 原生 OpenAPI + Scalar UI 取代傳統 Swagger UI 提供互動式 API 文件。
    - 單元測試權限邏輯 (Card Owner vs Task Assignee) 與 `UpdatedAt` 樂觀鎖衝突處理。
 
 2. **第二階段：Angular 介面與 Drag-and-Drop (1-2 週)**

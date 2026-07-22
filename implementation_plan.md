@@ -9,12 +9,15 @@
 - [ ] **1.1 建立 .NET 10 Web API 專案骨架**
   - 初始化 ASP.NET Core Web API 專案。
   - 配置 `appsettings.json` 與 Azure SQL Connection String。
-  - 導入 JWT Authentication 與 Swagger/OpenAPI。
+  - 導入 JWT Authentication（Access Token + Refresh Token 雙 Token 機制）與 .NET 10 原生 OpenAPI + Scalar UI。
+  - 設定 CORS 政策，僅允許設定檔中指定的前端網域存取。
 
 - [ ] **1.2 建立 EF Core Entities 與 DbContext**
-  - 建立 `User`, `Department`, `Card`, `CardTask` 實體。
+  - 建立 `User`, `Department`, `Card`, `CardTask`, `RefreshToken` 實體。
+  - `User` 新增 `PasswordHash` 欄位，密碼一律以 BCrypt 雜湊後儲存，不儲存明碼。
   - 設定 Enum：`CardStatus` (`Plan`, `ToDo`, `Doing`, `Done`) 與 `CardScope` (`Personal`, `Organization`)。
   - 建立 Model Builder Fluent API 關係與外鍵約束（`OwnerId`, `AssigneeId` 等）。
+  - 所有時間戳記欄位（`CreatedAt`/`UpdatedAt`/Token 到期時間）統一透過 `DateTimeProvider.TaiwanNow` 取得台灣時間（UTC+8），不使用伺服器/資料庫預設 UTC。
 
 - [ ] **1.3 資料庫 Migration 與 Initial Seed Data**
   - 執行 `dotnet ef migrations add InitialCreate`。
@@ -24,17 +27,24 @@
 
 ## 階段二：後端核心商業邏輯與 API 開發
 
-- [ ] **2.1 Card API 與權限驗證 Policy**
+- [ ] **2.1 Auth API 與密碼驗證**
+  - 實作 `POST /api/v1/auth/login`（Email + 密碼登入，以 BCrypt 驗證密碼雜湊，成功後回傳 Access Token 與 Refresh Token）。
+  - 實作 `POST /api/v1/auth/refresh`（驗證 Refresh Token 有效性，撤銷舊 Token 並換發新的 Access/Refresh Token）。
+  - 實作 `POST /api/v1/auth/logout`（撤銷指定 Refresh Token）。
+
+- [ ] **2.2 Card API 與權限驗證 Policy**
   - 實作 `GET /api/v1/cards`（根據視角過濾 `Personal` / `Organization` 與 `AssigneeId` 可見性）。
   - 實作 `POST /api/v1/cards`（預設建立者為 Owner）。
   - 實作 `PUT /api/v1/cards/{id}/status`（**權限驗證：僅 Card Owner 可調整列表狀態**）。
 
-- [ ] **2.2 Task API 與細項處理**
+- [ ] **2.3 Task API 與細項處理**
   - 實作 `POST /api/v1/cards/{cardId}/tasks`（僅 Card Owner 可新增細項與指派人員）。
   - 實作 `PATCH /api/v1/tasks/{taskId}/toggle`（**權限驗證：Card Owner 或被指派者可勾選 Task 完成狀態**）。
 
-- [ ] **2.3 SignalR 即時溝通 Hub 建立**
+- [ ] **2.4 SignalR 即時溝通 Hub 建立**
   - 建立 `KanbanHub` 處理卡片狀態移動、Task 完成狀態變更的廣播事件。
+  - 提供 `JoinDepartmentGroup` / `LeaveDepartmentGroup` 方法，讓前端依部門加入/離開對應的 SignalR Group（`department:{departmentId}`）。
+  - 事件廣播對象為卡片 Owner（依 JWT `NameIdentifier` claim）以及卡片所屬部門 Group（當 `Scope = Organization`）。
 
 ---
 
