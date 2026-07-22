@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>部門看板系統 UI POC - Kanban Dashboard</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header / Navbar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">📋</div>
+        <h1>DeptKanban <span class="poc-badge">UI POC</span></h1>
+      </div>
+
+      <!-- User & View Controller Panel -->
+      <div class="controls-panel">
+        <!-- View Mode Switcher -->
+        <div class="segmented-control">
+          <button class="segment-btn active" id="btnViewOrg" onclick="switchView('org')">
+            🏢 組織視角
+          </button>
+          <button class="segment-btn" id="btnViewPersonal" onclick="switchView('personal')">
+            🔒 個人視角
+          </button>
+        </div>
+
+        <!-- Role / Current User Switcher -->
+        <div class="user-switcher">
+          <label for="currentUserSelect">模擬當前登入者：</label>
+          <select id="currentUserSelect" onchange="changeCurrentUser(this.value)">
+            <option value="1">👤 Alex (經理 / Card Owner)</option>
+            <option value="2">👨‍💻 Bob (工程師 / Task Assignee)</option>
+            <option value="3">👩‍🎨 Claire (設計師 / Task Assignee)</option>
+            <option value="4">🙋‍♂️ David (普通同仁 / 唯讀觀看)</option>
+          </select>
+        </div>
+
+        <!-- Create Card Button -->
+        <button class="btn btn-primary" onclick="openCreateCardModal()">
+          <span>+</span> 新增卡片
+        </button>
+      </div>
+    </header>
+
+    <!-- Permission & User Info Banner -->
+    <section class="info-banner" id="infoBanner">
+      <!-- Dynamic Banner Text via JS -->
+    </section>
+
+    <!-- Kanban Board Container -->
+    <main class="kanban-board">
+      <!-- 4 Status Columns -->
+      <div class="kanban-column" data-status="0" ondragover="allowDrop(event)" ondrop="handleDrop(event, 0)">
+        <div class="column-header status-plan">
+          <div class="header-title">
+            <span class="status-indicator"></span>
+            <h2>Plan (計畫中)</h2>
+          </div>
+          <span class="card-count" id="count-0">0</span>
+        </div>
+        <div class="column-cards" id="column-0"></div>
+      </div>
+
+      <div class="kanban-column" data-status="1" ondragover="allowDrop(event)" ondrop="handleDrop(event, 1)">
+        <div class="column-header status-todo">
+          <div class="header-title">
+            <span class="status-indicator"></span>
+            <h2>To Do (待辦)</h2>
+          </div>
+          <span class="card-count" id="count-1">0</span>
+        </div>
+        <div class="column-cards" id="column-1"></div>
+      </div>
+
+      <div class="kanban-column" data-status="2" ondragover="allowDrop(event)" ondrop="handleDrop(event, 2)">
+        <div class="column-header status-doing">
+          <div class="header-title">
+            <span class="status-indicator"></span>
+            <h2>Doing (進行中)</h2>
+          </div>
+          <span class="card-count" id="count-2">0</span>
+        </div>
+        <div class="column-cards" id="column-2"></div>
+      </div>
+
+      <div class="kanban-column" data-status="3" ondragover="allowDrop(event)" ondrop="handleDrop(event, 3)">
+        <div class="column-header status-done">
+          <div class="header-title">
+            <span class="status-indicator"></span>
+            <h2>Done (已完成)</h2>
+          </div>
+          <span class="card-count" id="count-3">0</span>
+        </div>
+        <div class="column-cards" id="column-3"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Card Modal -->
+  <div class="modal-overlay" id="cardModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>新增看板卡片</h3>
+        <button class="close-btn" onclick="closeCreateCardModal()">&times;</button>
+      </div>
+      <form id="createCardForm" onsubmit="handleCreateCard(event)">
+        <div class="form-group">
+          <label>卡片標題 *</label>
+          <input type="text" id="cardTitleInput" placeholder="請輸入任務或專案名稱..." required />
+        </div>
+        <div class="form-group">
+          <label>卡片描述</label>
+          <textarea id="cardDescInput" rows="3" placeholder="詳細背景說明..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>卡片範圍 (Scope)</label>
+            <select id="cardScopeInput">
+              <option value="1">🏢 組織卡片 (Organization)</option>
+              <option value="0">🔒 個人卡片 (Personal)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>起始狀態</label>
+            <select id="cardStatusInput">
+              <option value="0">Plan (計畫中)</option>
+              <option value="1">To Do (待辦)</option>
+              <option value="2">Doing (進行中)</option>
+              <option value="3">Done (已完成)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>新增細項 Tasks</label>
+          <div id="newTaskList" class="new-task-list">
+            <!-- Dynamic task inputs -->
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addNewTaskInputRow()">
+            + 新增一個細項 Task
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateCardModal()">取消</button>
+          <button type="submit" class="btn btn-primary">建立卡片</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
