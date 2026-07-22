@@ -1,14 +1,12 @@
-SET IDENTITY_INSERT [DEPARTMENTS] ON;
 INSERT INTO [DEPARTMENTS] ([Id], [Name])
 VALUES (1, N'Engineering'), (2, N'Product');
-SET IDENTITY_INSERT [DEPARTMENTS] OFF;
+ALTER SEQUENCE [dbo].[DepartmentIdSequence] RESTART WITH 3;
 
-SET IDENTITY_INSERT [USERS] ON;
 INSERT INTO [USERS] ([Id], [Name], [Email], [DepartmentId], [Role])
 VALUES
     (1, N'Alex Owner', N'alex@example.com', 1, N'Owner'),
     (2, N'Sam Assignee', N'sam@example.com', 1, N'Member');
-SET IDENTITY_INSERT [USERS] OFF;
+ALTER SEQUENCE [dbo].[UserIdSequence] RESTART WITH 3;
 
 INSERT INTO [CARDS] (
     [Id], [Title], [Description], [Status], [Scope], [OwnerId], [DepartmentId],
