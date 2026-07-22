@@ -35,6 +35,7 @@
     <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
   </PropertyGroup>
   <ItemGroup>
+    <Build Include="Functions\GetTaiwanDate.sql" />
     <Build Include="Sequences\DepartmentIdSequence.sql" />
     <Build Include="Sequences\UserIdSequence.sql" />
     <Build Include="Tables\DEPARTMENTS.sql" />

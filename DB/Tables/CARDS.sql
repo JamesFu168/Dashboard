@@ -9,8 +9,8 @@ CREATE TABLE [dbo].[CARDS] (
     [DueDate] date NULL,
     [SequenceOrder] int NOT NULL,
     [DevOpsUrl] nvarchar(1000) NULL,
-    [CreatedAt] datetimeoffset(3) NOT NULL,
-    [UpdatedAt] datetimeoffset(3) NOT NULL,
+    [CreatedAt] datetime NOT NULL CONSTRAINT [DF_CARDS_CreatedAt] DEFAULT ([dbo].[GetTaiwanDate]()),
+    [UpdatedAt] datetime NOT NULL,
     CONSTRAINT [PK_CARDS] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_CARDS_DEPARTMENTS_DepartmentId] FOREIGN KEY ([DepartmentId]) REFERENCES [dbo].[DEPARTMENTS] ([Id]),
     CONSTRAINT [FK_CARDS_USERS_OwnerId] FOREIGN KEY ([OwnerId]) REFERENCES [dbo].[USERS] ([Id])

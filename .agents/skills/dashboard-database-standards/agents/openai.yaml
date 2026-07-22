@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dashboard Database Standards"
+  short_description: "Apply Dashboard SQL date and schema conventions"
+  default_prompt: "Use $dashboard-database-standards to add or modify a Dashboard database table while following the project conventions."

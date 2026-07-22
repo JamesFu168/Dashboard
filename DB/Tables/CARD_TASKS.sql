@@ -7,8 +7,8 @@ CREATE TABLE [dbo].[CARD_TASKS] (
     [SequenceOrder] int NOT NULL,
     [DueDate] date NULL,
     [DevOpsUrl] nvarchar(1000) NULL,
-    [CreatedAt] datetimeoffset(3) NOT NULL,
-    [UpdatedAt] datetimeoffset(3) NOT NULL,
+    [CreatedAt] datetime NOT NULL CONSTRAINT [DF_CARD_TASKS_CreatedAt] DEFAULT ([dbo].[GetTaiwanDate]()),
+    [UpdatedAt] datetime NOT NULL,
     CONSTRAINT [PK_CARD_TASKS] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_CARD_TASKS_CARDS_CardId] FOREIGN KEY ([CardId]) REFERENCES [dbo].[CARDS] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_CARD_TASKS_USERS_AssigneeId] FOREIGN KEY ([AssigneeId]) REFERENCES [dbo].[USERS] ([Id])

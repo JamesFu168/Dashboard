@@ -1,0 +1,6 @@
+CREATE FUNCTION [dbo].[GetTaiwanDate]()
+RETURNS datetime
+AS
+BEGIN
+    RETURN DATEADD(HOUR, 8, GETUTCDATE());
+END;
