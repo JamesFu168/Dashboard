@@ -1,0 +1,68 @@
+<main class="board-shell">
+  <header class="board-header">
+    <div>
+      <p class="eyebrow">Kanban Dashboard</p>
+      <h1>Work board</h1>
+    </div>
+
+    <div class="view-switch" aria-label="View mode">
+      <button type="button" [class.active]="state.viewMode() === 'personal'" (click)="setViewMode('personal')">
+        Personal
+      </button>
+      <button type="button" [class.active]="state.viewMode() === 'organization'" (click)="setViewMode('organization')">
+        Organization
+      </button>
+    </div>
+  </header>
+
+  <section class="columns" [class.loading]="state.loading()">
+    @for (column of state.columns(); track column.status) {
+      <section
+        class="column"
+        cdkDropList
+        [cdkDropListData]="column.cards"
+        (cdkDropListDropped)="drop($event, column.status)">
+        <header class="column-header">
+          <h2>{{ column.title }}</h2>
+          <span>{{ column.cards.length }}</span>
+        </header>
+
+        <div class="card-list">
+          @for (card of column.cards; track card.id) {
+            <article
+              class="kanban-card"
+              cdkDrag
+              [cdkDragData]="card"
+              [cdkDragDisabled]="!isOwner(card)"
+              [class.readonly]="!isOwner(card)">
+              <div class="card-topline">
+                <span class="scope">{{ card.scope === 1 ? 'Org' : 'Personal' }}</span>
+                @if (card.dueDate) {
+                  <time>{{ card.dueDate }}</time>
+                }
+              </div>
+
+              <h3>{{ card.title }}</h3>
+              @if (card.description) {
+                <p>{{ card.description }}</p>
+              }
+
+              <div class="tasks">
+                @for (task of card.tasks; track task.id) {
+                  <label class="task" [class.done]="task.isCompleted">
+                    <input
+                      type="checkbox"
+                      [checked]="task.isCompleted"
+                      [disabled]="!canToggleTask(card, task)"
+                      (change)="toggleTask(task)">
+                    <span>{{ task.title }}</span>
+                  </label>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  </section>
+</main>
