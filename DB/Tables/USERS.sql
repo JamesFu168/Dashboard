@@ -2,6 +2,7 @@ CREATE TABLE [dbo].[USERS] (
     [Id] int NOT NULL CONSTRAINT [DF_USERS_Id] DEFAULT (NEXT VALUE FOR [dbo].[UserIdSequence]),
     [Name] nvarchar(120) NOT NULL,
     [Email] nvarchar(256) NOT NULL,
+    [PasswordHash] nvarchar(512) NOT NULL,
     [DepartmentId] int NOT NULL,
     [Role] nvarchar(60) NOT NULL,
     CONSTRAINT [PK_USERS] PRIMARY KEY ([Id]),
@@ -17,3 +18,27 @@ GO
 
 CREATE INDEX [IX_USERS_DepartmentId]
     ON [dbo].[USERS] ([DepartmentId]);
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'使用者識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'USERS', @level2type = N'COLUMN', @level2name = N'Id';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'使用者姓名', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'USERS', @level2type = N'COLUMN', @level2name = N'Name';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'電子郵件地址', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'USERS', @level2type = N'COLUMN', @level2name = N'Email';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'密碼雜湊值', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'USERS', @level2type = N'COLUMN', @level2name = N'PasswordHash';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'所屬部門識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'USERS', @level2type = N'COLUMN', @level2name = N'DepartmentId';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'使用者角色', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'USERS', @level2type = N'COLUMN', @level2name = N'Role';

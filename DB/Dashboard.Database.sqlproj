@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{F706B623-EAC5-4764-BA6D-397A0782CA01}</ProjectGuid>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">18.0</VisualStudioVersion>
     <Name>Dashboard.Database</Name>
     <RootNamespace>Dashboard.Database</RootNamespace>
     <OutputType>Database</OutputType>
@@ -14,7 +14,7 @@
     <SqlServerVerification>False</SqlServerVerification>
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
-    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultCollation>Chinese_Taiwan_Stroke_BIN2</DefaultCollation>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
     <DacApplicationName>Dashboard.Database</DacApplicationName>
     <DacVersion>1.0.0.0</DacVersion>

@@ -26,6 +26,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(u => u.Id);
             entity.Property(u => u.Name).HasMaxLength(120).IsRequired();
             entity.Property(u => u.Email).HasMaxLength(256).IsRequired();
+            entity.Property(u => u.PasswordHash).HasMaxLength(512).IsRequired();
             entity.Property(u => u.Role).HasMaxLength(60).IsRequired();
             entity.HasIndex(u => u.Email).IsUnique();
             entity.HasOne(u => u.Department)
@@ -93,8 +94,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             new Department { Id = productId, Name = "Product" });
 
         modelBuilder.Entity<User>().HasData(
-            new User { Id = ownerId, Name = "Alex Owner", Email = "alex@example.com", DepartmentId = engineeringId, Role = "Owner" },
-            new User { Id = assigneeId, Name = "Sam Assignee", Email = "sam@example.com", DepartmentId = engineeringId, Role = "Member" });
+            new User { Id = ownerId, Name = "Alex Owner", Email = "alex@example.com", PasswordHash = "SEED_PASSWORD_HASH_REPLACE_BEFORE_USE", DepartmentId = engineeringId, Role = "Owner" },
+            new User { Id = assigneeId, Name = "Sam Assignee", Email = "sam@example.com", PasswordHash = "SEED_PASSWORD_HASH_REPLACE_BEFORE_USE", DepartmentId = engineeringId, Role = "Member" });
 
         modelBuilder.Entity<Card>().HasData(
             new Card

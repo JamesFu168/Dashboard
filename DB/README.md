@@ -10,13 +10,13 @@ This folder stores database-owned artifacts for the Kanban dashboard.
 Build the DACPAC from Visual Studio, or with MSBuild on a machine that has SSDT installed:
 
 ```powershell
-msbuild .\DB\Dashboard.Database.sqlproj /p:Configuration=Release
+& "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe" .\DB\Dashboard.Database.sqlproj /p:Configuration=Release
 ```
 
 Publish the generated DACPAC with SqlPackage:
 
 ```powershell
-SqlPackage /Action:Publish /SourceFile:.\DB\bin\Release\Dashboard.Database.dacpac /TargetConnectionString:"<connection string>"
+& "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\SqlPackage.exe" /Action:Publish /SourceFile:.\DB\bin\Release\Dashboard.Database.dacpac /TargetConnectionString:"<connection string>"
 ```
 
 The seed script is included in the project as a supporting file, but it is not wired into automatic publish because the current inserts are intended for a fresh database.

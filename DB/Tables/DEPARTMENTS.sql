@@ -8,3 +8,11 @@ GO
 
 CREATE UNIQUE INDEX [IX_DEPARTMENTS_Name]
     ON [dbo].[DEPARTMENTS] ([Name]);
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'部門識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'DEPARTMENTS', @level2type = N'COLUMN', @level2name = N'Id';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'部門名稱', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'DEPARTMENTS', @level2type = N'COLUMN', @level2name = N'Name';
