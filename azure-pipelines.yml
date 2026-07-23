@@ -1,19 +1,66 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Azure DevOps Pipeline for API Service
+# 觸發條件：只有在 main 分支且 API/ 目錄底下檔案有變更時才觸發
 
 trigger:
-- main
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - API/**
 
-pool:
-  vmImage: ubuntu-latest
+variables:
+  dotnetVersion: '10.0.x'
+  buildConfiguration: 'Release'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/API'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
+  - stage: Build
+    displayName: 'Build and Package API'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build & Package Job'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          # 1. 安裝指定版本的 .NET SDK
+          - task: UseDotNet@2
+            displayName: 'Install .NET SDK'
+            inputs:
+              packageType: 'sdk'
+              version: '$(dotnetVersion)'
+              includePreview: true
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+          # 2. 還原 NuGet 套件
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet Packages'
+            inputs:
+              command: 'restore'
+              projects: '$(workingDirectory)/Dashboard.Api.csproj'
+
+          # 3. 編譯 API 專案
+          - task: DotNetCoreCLI@2
+            displayName: 'Build API Project'
+            inputs:
+              command: 'build'
+              projects: '$(workingDirectory)/Dashboard.Api.csproj'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+
+          # 4. 發布 (Publish) API 專案打包成 Zip
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish API Project'
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: '$(workingDirectory)/Dashboard.Api.csproj'
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-build'
+              zipAfterPublish: true
+
+          # 5. 上傳 Artifact
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Build Artifact'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+
