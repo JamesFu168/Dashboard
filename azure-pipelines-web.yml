@@ -1,0 +1,54 @@
+# Azure DevOps Pipeline for Frontend Web (Angular)
+# 觸發條件：只有在 main 分支且 Web/ 目錄底下檔案有變更時才觸發
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - Web/**
+
+pr: none
+
+variables:
+  nodeVersion: '20.x'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/Web'
+
+stages:
+  - stage: Build
+    displayName: 'Build Angular Web App'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Angular Web Job'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          # 1. 安裝指定版本的 Node.js
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+              versionSpec: '$(nodeVersion)'
+
+          # 2. 還原 npm 套件
+          - task: Npm@1
+            displayName: 'Install npm packages'
+            inputs:
+              command: 'ci'
+              workingDir: '$(workingDirectory)'
+
+          # 3. 編譯 Angular 專案
+          - task: Npm@1
+            displayName: 'Build Angular Project'
+            inputs:
+              command: 'custom'
+              workingDir: '$(workingDirectory)'
+              customCommand: 'run build'
+
+          # 4. 上傳編譯產物 (Artifact)
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Web Build Artifact'
+            inputs:
+              PathtoPublish: '$(workingDirectory)/dist/dashboard-kanban-web'
+              ArtifactName: 'web-drop'
+              publishLocation: 'Container'
