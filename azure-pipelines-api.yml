@@ -12,14 +12,6 @@ trigger:
 pr: none
 
 variables:
-  # ---------------------------------------------------------------------------
-  # ⚠️ 請根據您的 Azure DevOps 與 Azure 環境修改以下變數：
-  # azureSubscription: Azure DevOps 中設定的 Service Connection 名稱
-  # webAppName: Azure App Service (Web App) 的名稱
-  # ---------------------------------------------------------------------------
-  azureSubscription: 'YOUR_AZURE_SERVICE_CONNECTION_NAME'
-  webAppName: 'YOUR_AZURE_WEB_APP_NAME'
-
   dotnetVersion: '10.0.x'
   buildConfiguration: 'Release'
   workingDirectory: '$(System.DefaultWorkingDirectory)/API'
@@ -73,25 +65,3 @@ stages:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
               ArtifactName: 'drop'
               publishLocation: 'Container'
-
-  - stage: Deploy
-    displayName: 'Deploy API to Azure Web App'
-    dependsOn: Build
-    condition: succeeded()
-    jobs:
-      - deployment: DeployJob
-        displayName: 'Deploy Job'
-        environment: 'Production'
-        pool:
-          vmImage: 'ubuntu-latest'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: AzureWebApp@1
-                  displayName: 'Deploy to Azure Web App'
-                  inputs:
-                    azureSubscription: '$(azureSubscription)'
-                    appType: 'webApp'
-                    appName: '$(webAppName)'
-                    package: '$(Pipeline.Workspace)/drop/*.zip'
