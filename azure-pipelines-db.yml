@@ -1,0 +1,89 @@
+# Azure DevOps Pipeline for Database Project (SSDT .sqlproj)
+# 觸發條件：只有在 main 分支且 DB/ 目錄底下檔案有變更時才觸發
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - DB/**
+
+pr: none
+
+variables:
+  # ---------------------------------------------------------------------------
+  # ⚠️ 請根據您的 Azure DevOps 與 Azure SQL Database 環境修改以下變數：
+  # azureSubscription: Azure DevOps 中設定的 Service Connection 名稱
+  # serverName: Azure SQL Server 的完整網域名稱 (例: my-sql-server.database.windows.net)
+  # databaseName: 欲佈署的 Azure SQL Database 名稱
+  # sqlUsername: SQL Server 管理員帳號
+  # SqlPassword: 請在 Azure DevOps Pipeline 介面設定為加密變數 (Secret Variable)
+  # ---------------------------------------------------------------------------
+  azureSubscription: 'YOUR_AZURE_SERVICE_CONNECTION_NAME'
+  serverName: 'YOUR_SQL_SERVER_NAME.database.windows.net'
+  databaseName: 'YOUR_SQL_DATABASE_NAME'
+  sqlUsername: 'YOUR_SQL_ADMIN_USER'
+
+  buildConfiguration: 'Release'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/DB'
+
+stages:
+  - stage: Build
+    displayName: 'Build DB DACPAC'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build DB Project Job'
+        pool:
+          vmImage: 'windows-latest' # SSDT (.sqlproj) 專案需使用 Windows Agent 編譯
+        steps:
+          # 1. 使用 Visual Studio Build 編譯 SQL 專案並產生 .dacpac 檔案
+          - task: VSBuild@1
+            displayName: 'Build SQL Project (.sqlproj)'
+            inputs:
+              solution: '$(workingDirectory)/Dashboard.Database.sqlproj'
+              msbuildArgs: '/p:Configuration=$(buildConfiguration) /p:OutDir=$(Build.ArtifactStagingDirectory)/dacpac'
+              platform: 'Any CPU'
+              configuration: '$(buildConfiguration)'
+
+          # 2. 上傳 DACPAC 發布檔做為 Artifact
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish DACPAC Artifact'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/dacpac'
+              ArtifactName: 'dacpac'
+              publishLocation: 'Container'
+
+  - stage: Deploy
+    displayName: 'Deploy to Azure SQL Database'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: DeployJob
+        displayName: 'Deploy DACPAC Job'
+        environment: 'Production'
+        pool:
+          vmImage: 'windows-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # 1. 下載上一階段產出的 DACPAC Artifact
+                - download: current
+                  artifact: dacpac
+
+                # 2. 透過 SqlAzureDacpacDeployment Task 自動套用 / 佈署 Schema 至 Azure SQL Database
+                - task: SqlAzureDacpacDeployment@1
+                  displayName: 'Deploy DACPAC to Azure SQL Database'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    AuthenticationType: 'server'
+                    ServerName: '$(serverName)'
+                    DatabaseName: '$(databaseName)'
+                    SqlUsername: '$(sqlUsername)'
+                    SqlPassword: '$(SqlPassword)' # 讀取自 Azure DevOps Secret Variable
+                    DeployType: 'DacpacTask'
+                    DeploymentAction: 'Publish'
+                    DacpacFile: '$(Pipeline.Workspace)/dacpac/Dashboard.Database.dacpac'
+                    # 若需要覆蓋或允許特定佈署選項，可開啟以下參數：
+                    # AdditionalArguments: '/p:BlockOnPossibleDataLoss=False'
