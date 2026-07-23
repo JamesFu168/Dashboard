@@ -25,10 +25,10 @@ stages:
           vmImage: 'ubuntu-latest'
         steps:
           # 1. 安裝指定版本的 Node.js
-          - task: NodeTool@0
+          - task: UseNode@1
             displayName: 'Install Node.js'
             inputs:
-              versionSpec: '$(nodeVersion)'
+              version: '$(nodeVersion)'
 
           # 2. 還原 npm 套件
           - task: Npm@1
@@ -45,10 +45,20 @@ stages:
               workingDir: '$(workingDirectory)'
               customCommand: 'run build'
 
-          # 4. 上傳編譯產物 (Artifact)
+          # 4. 壓縮編譯產出為 zip 檔案 (供 Release Deploy Task 讀取 *.zip)
+          - task: ArchiveFiles@2
+            displayName: 'Archive dist folder to zip'
+            inputs:
+              rootFolderOrFile: '$(workingDirectory)/dist/dashboard-kanban-web'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/dist.zip'
+              replaceExistingArchive: true
+
+          # 5. 上傳編譯產物 (Artifact)
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Web Build Artifact'
             inputs:
-              PathtoPublish: '$(workingDirectory)/dist/dashboard-kanban-web'
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
               ArtifactName: 'web-drop'
               publishLocation: 'Container'
