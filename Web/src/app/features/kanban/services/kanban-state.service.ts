@@ -24,7 +24,7 @@ export class KanbanStateService {
   /** 回收桶軟刪除卡片列表 (唯讀 Signal) */
   readonly trash = this.trashSignal.asReadonly();
 
-  /** 依卡片 Status (Plan, ToDo, Doing, Done) 分類之 4 個 Column (Computed Signal) */
+  /** 依卡片 Status (Plan, ToDo, Doing, Done) 分類之 4 個 Column，自動排除 AutoClosed 卡片 (Computed Signal) */
   readonly columns = computed(() => [
     this.createColumn(CardStatus.Plan, '規劃'),
     this.createColumn(CardStatus.ToDo, '待辦'),
@@ -89,6 +89,18 @@ export class KanbanStateService {
   deleteCard(card: KanbanCard): Observable<void> {
     return this.api.deleteCard(card.id).pipe(
       tap(() => this.removeCard(card.id))
+    );
+  }
+
+  /**
+   * 觸發自動結案上個月已完成之卡片，並將結案卡片從看板中移除。
+   */
+  autoClosePreviousMonth(): Observable<KanbanCard[]> {
+    return this.api.autoClosePreviousMonthCards().pipe(
+      tap((closedCards) => {
+        const closedIds = new Set(closedCards.map((item) => item.id));
+        this.cardsSignal.update((cards) => cards.filter((item) => !closedIds.has(item.id)));
+      })
     );
   }
 
@@ -175,9 +187,14 @@ export class KanbanStateService {
   }
 
   /**
-   * 新增或更新卡片至本地 Signals。
+   * 新增或更新卡片至本地 Signals。已結案或已刪除卡片自動不儲存至當前看板 Signals。
    */
   upsertCard(card: KanbanCard): void {
+    if (card.status === CardStatus.AutoClosed) {
+      this.removeCard(card.id);
+      return;
+    }
+
     this.cardsSignal.update((cards) => {
       const existing = cards.some((item) => item.id === card.id);
       return existing

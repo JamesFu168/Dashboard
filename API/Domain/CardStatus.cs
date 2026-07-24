@@ -23,5 +23,10 @@ public enum CardStatus
     /// <summary>
     /// 已完成
     /// </summary>
-    Done = 3
+    Done = 3,
+
+    /// <summary>
+    /// 自動結案 (前一個月已完成之卡片自動轉入此狀態，預設不顯示於看板)
+    /// </summary>
+    AutoClosed = 4
 }

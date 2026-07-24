@@ -6,7 +6,7 @@ import { AssignTaskRequest, CardTask, CreateCardRequest, CreateTaskRequest, Kanb
 
 /**
  * 看板系統 HTTP API 串接服務 (KanbanService)。
- * 提供卡片 CRUD、狀態拖移、軟刪除/回收桶還原、細項 Task 與成員清單 API 存取。
+ * 提供卡片 CRUD、狀態拖移、軟刪除/回收桶還原、自動結案、細項 Task 與成員清單 API 存取。
  */
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -14,7 +14,7 @@ export class KanbanService {
   private readonly apiBaseUrl = `${environment.apiBaseUrl}/api/v1`;
 
   /**
-   * 取得指定視角的卡片列表。
+   * 取得指定視角可存取的卡片列表 (預設排除 AutoClosed 與 IsDeleted 卡片)。
    * @param viewMode 'personal' (個人視角) 或 'organization' (組織視角)
    */
   getCards(viewMode: 'personal' | 'organization'): Observable<KanbanCard[]> {
@@ -70,6 +70,20 @@ export class KanbanService {
    */
   deleteCard(cardId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiBaseUrl}/cards/${cardId}`);
+  }
+
+  /**
+   * 批次將上個月以前完成 (Done) 之卡片自動更新為結案 (AutoClosed)。
+   */
+  autoClosePreviousMonthCards(): Observable<KanbanCard[]> {
+    return this.http.post<KanbanCard[]>(`${this.apiBaseUrl}/cards/auto-close-previous-month`, {});
+  }
+
+  /**
+   * 取得已結案 (AutoClosed) 卡片列表。
+   */
+  getClosedCards(): Observable<KanbanCard[]> {
+    return this.http.get<KanbanCard[]>(`${this.apiBaseUrl}/cards/closed`);
   }
 
   /**

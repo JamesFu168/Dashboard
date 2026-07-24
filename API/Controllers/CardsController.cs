@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Dashboard.Api.Controllers;
 
 /// <summary>
-/// 處理看板卡片 CRUD、狀態拖移、軟刪除與回收桶還原管理之控制器 (Cards Controller)。
+/// 處理看板卡片 CRUD、狀態拖移、軟刪除與回收桶還原、每月自動結案管理之控制器 (Cards Controller)。
 /// </summary>
 [ApiController]
 [Route("api/v1/cards")]
@@ -21,7 +21,7 @@ public sealed class CardsController(
     IHubContext<KanbanHub> hub) : ControllerBase
 {
     /// <summary>
-    /// 取得當前使用者權限可存取的卡片列表。
+    /// 取得當前使用者權限可存取的卡片列表 (預設自動忽略已軟刪除 IsDeleted 與已結案 AutoClosed 之卡片)。
     /// </summary>
     /// <param name="viewMode">檢視模式 (organization: 組織視角, personal: 個人視角)</param>
     /// <returns>卡片 DTO 集合</returns>
@@ -190,6 +190,7 @@ public sealed class CardsController(
 
     /// <summary>
     /// 標記軟刪除卡片 (`IsDeleted = true`, `DeletedAt = TaiwanNow`)，移至回收桶 (僅限 Owner)。
+    /// 軟刪除後預設不顯示於看板上。
     /// </summary>
     /// <param name="id">卡片 GUID</param>
     /// <returns>無內容成功回應 (204 No Content)</returns>
@@ -213,6 +214,62 @@ public sealed class CardsController(
         await PublishAsync("CardDeleted", card);
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// 批次將前一個月已完成 (Status = Done，且最後更新時間小於本月1號) 之卡片自動更新為結案 (Status = AutoClosed)。
+    /// 結案後之卡片預設將不會顯示於看板上。
+    /// </summary>
+    /// <returns>已自動結案之卡片列表與數量</returns>
+    [HttpPost("auto-close-previous-month")]
+    public async Task<ActionResult<IReadOnlyCollection<CardDto>>> AutoClosePreviousMonthCards()
+    {
+        var now = DateTimeProvider.TaiwanNow;
+        var firstDayOfCurrentMonth = new DateTime(now.Year, now.Month, 1);
+
+        // 搜尋上個月以前已 Done 且未刪除之卡片
+        var doneCardsToClose = await db.Cards
+            .Where(card => card.Status == CardStatus.Done && card.UpdatedAt < firstDayOfCurrentMonth)
+            .Include(card => card.Owner)
+            .Include(card => card.Department)
+            .Include(card => card.Tasks)
+            .ThenInclude(task => task.Assignee)
+            .ToListAsync();
+
+        foreach (var card in doneCardsToClose)
+        {
+            card.Status = CardStatus.AutoClosed;
+            card.UpdatedAt = now;
+        }
+
+        await db.SaveChangesAsync();
+
+        // 透過 SignalR 廣播每一張已結案卡片從看板移除
+        foreach (var card in doneCardsToClose)
+        {
+            await PublishAsync("CardDeleted", card);
+        }
+
+        return Ok(doneCardsToClose.Select(card => card.ToDto()).ToArray());
+    }
+
+    /// <summary>
+    /// 取得歷史已結案 (Status = AutoClosed) 之卡片列表 (供封存或歷史紀錄查詢)。
+    /// </summary>
+    /// <returns>已結案卡片 DTO 集合</returns>
+    [HttpGet("closed")]
+    public async Task<ActionResult<IReadOnlyCollection<CardDto>>> GetClosedCards()
+    {
+        var cards = await db.Cards
+            .Where(card => card.Status == CardStatus.AutoClosed && (card.OwnerId == currentUser.UserId || card.DepartmentId == currentUser.DepartmentId))
+            .Include(card => card.Owner)
+            .Include(card => card.Department)
+            .Include(card => card.Tasks)
+            .ThenInclude(task => task.Assignee)
+            .OrderByDescending(card => card.UpdatedAt)
+            .ToListAsync();
+
+        return Ok(cards.Select(card => card.ToDto()).ToArray());
     }
 
     /// <summary>

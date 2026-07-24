@@ -12,34 +12,21 @@ public sealed class CardAuthorizationService
     /// <summary>
     /// 檢查當前使用者是否具備編輯卡片內容的權限 (僅限 Card Owner)。
     /// </summary>
-    /// <param name="currentUserId">當前登入者 ID</param>
-    /// <param name="card">目標卡片</param>
-    /// <returns>若具有權限回傳 true，否則回傳 false</returns>
     public bool CanEditCard(int currentUserId, Card card) => card.OwnerId == currentUserId;
 
     /// <summary>
     /// 檢查當前使用者是否具備移動卡片狀態/排序的權限 (僅限 Card Owner)。
     /// </summary>
-    /// <param name="currentUserId">當前登入者 ID</param>
-    /// <param name="card">目標卡片</param>
-    /// <returns>若具有權限回傳 true，否則回傳 false</returns>
     public bool CanMoveCard(int currentUserId, Card card) => card.OwnerId == currentUserId;
 
     /// <summary>
     /// 檢查當前使用者是否具備管理 (新增/編輯/刪除/指派) 該卡片內部細項任務的權限 (僅限 Card Owner)。
     /// </summary>
-    /// <param name="currentUserId">當前登入者 ID</param>
-    /// <param name="card">目標卡片</param>
-    /// <returns>若具有權限回傳 true，否則回傳 false</returns>
     public bool CanManageTasks(int currentUserId, Card card) => card.OwnerId == currentUserId;
 
     /// <summary>
     /// 檢查當前使用者是否具備勾選/切換特定 Task 完成狀態的權限 (Card Owner 或 Task Assignee)。
     /// </summary>
-    /// <param name="currentUserId">當前登入者 ID</param>
-    /// <param name="task">目標任務細項</param>
-    /// <param name="card">所屬卡片</param>
-    /// <returns>若具有權限回傳 true，否則回傳 false</returns>
     public bool CanToggleTask(int currentUserId, CardTask task, Card card)
     {
         return card.OwnerId == currentUserId || task.AssigneeId == currentUserId;
@@ -47,6 +34,7 @@ public sealed class CardAuthorizationService
 
     /// <summary>
     /// 根據當前使用者視角與權限，產生取得可存取卡片列表的 IQueryable 查詢語法。
+    /// 預設自動過濾已結案 (AutoClosed) 的卡片。
     /// </summary>
     /// <param name="db">資料庫 Context</param>
     /// <param name="userId">當前登入者 ID</param>
@@ -62,10 +50,11 @@ public sealed class CardAuthorizationService
         if (string.Equals(viewMode, "organization", StringComparison.OrdinalIgnoreCase))
         {
             return db.Cards.Where(card =>
-                card.Scope == CardScope.Organization
+                card.Status != CardStatus.AutoClosed
+                && card.Scope == CardScope.Organization
                 && (card.DepartmentId == userDepartmentId || card.Tasks.Any(task => task.AssigneeId == userId)));
         }
 
-        return db.Cards.Where(card => card.OwnerId == userId && card.Scope == CardScope.Personal);
+        return db.Cards.Where(card => card.Status != CardStatus.AutoClosed && card.OwnerId == userId && card.Scope == CardScope.Personal);
     }
 }

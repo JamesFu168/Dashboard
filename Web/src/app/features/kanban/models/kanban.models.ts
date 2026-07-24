@@ -9,7 +9,9 @@ export enum CardStatus {
   /** 進行中 */
   Doing = 2,
   /** 已完成 */
-  Done = 3
+  Done = 3,
+  /** 自動結案 (上個月已完成卡片自動結案，預設不顯示於看板) */
+  AutoClosed = 4
 }
 
 /**
