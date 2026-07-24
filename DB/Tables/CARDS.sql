@@ -9,6 +9,8 @@ CREATE TABLE [dbo].[CARDS] (
     [DueDate] date NULL,
     [SequenceOrder] int NOT NULL,
     [DevOpsUrl] nvarchar(1000) NULL,
+    [IsDeleted] bit NOT NULL CONSTRAINT [DF_CARDS_IsDeleted] DEFAULT ((0)),
+    [DeletedAt] datetime NULL,
     [CreatedAt] datetime NOT NULL CONSTRAINT [DF_CARDS_CreatedAt] DEFAULT ([dbo].[GetTaiwanDate]()),
     [UpdatedAt] datetime NOT NULL,
     CONSTRAINT [PK_CARDS] PRIMARY KEY ([Id]),
@@ -78,3 +80,13 @@ EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'建立時�
 GO
 
 EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'最後更新時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'UpdatedAt';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'是否已軟刪除', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'IsDeleted';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'軟刪除時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DeletedAt';
+
+GO
