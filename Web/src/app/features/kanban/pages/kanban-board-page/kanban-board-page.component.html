@@ -25,7 +25,7 @@
     </div>
   </header>
 
-  <section class="columns" [class.loading]="state.loading()" [class.has-expanded]="expandedStatus() !== null">
+  <section class="columns" cdkDropListGroup [class.loading]="state.loading()" [class.has-expanded]="expandedStatus() !== null">
     @for (column of state.columns(); track column.status) {
       <section
         class="column"
@@ -80,9 +80,18 @@
                 }
               </div>
 
-              <h3>{{ card.title }}</h3>
+              <h3 [title]="card.title">{{ card.title }}</h3>
               @if (card.description) {
-                <p>{{ card.description }}</p>
+                <p [title]="card.description">{{ card.description }}</p>
+              }
+
+              @if (card.tasks.length > 0) {
+                <div class="task-progress">
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" [style.width.%]="taskProgress(card)"></div>
+                  </div>
+                  <span class="progress-text">{{ completedTaskCount(card) }}/{{ card.tasks.length }}</span>
+                </div>
               }
 
               <div class="tasks">

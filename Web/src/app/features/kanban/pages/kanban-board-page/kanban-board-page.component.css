@@ -294,6 +294,9 @@ time {
   font-size: 18px;
   line-height: 1.35;
   margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .kanban-card p {
@@ -301,6 +304,38 @@ time {
   font-size: 15px;
   line-height: 1.45;
   margin-bottom: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-progress {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.progress-bar-bg {
+  background: #e5eaf1;
+  border-radius: 3px;
+  flex-grow: 1;
+  height: 6px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: linear-gradient(90deg, #4b6bfb, #2fbf85);
+  border-radius: 3px;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  color: #7b8794;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .tasks {

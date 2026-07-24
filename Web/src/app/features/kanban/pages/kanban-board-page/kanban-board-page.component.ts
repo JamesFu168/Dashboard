@@ -73,6 +73,16 @@ export class KanbanBoardPageComponent implements OnInit {
     return this.isOwner(card) || task.assigneeId === this.auth.user()?.userId;
   }
 
+  /** 計算卡片內 Task 已完成數量 */
+  completedTaskCount(card: KanbanCard): number {
+    return card.tasks.filter((task) => task.isCompleted).length;
+  }
+
+  /** 計算卡片內 Task 完成百分比 (0-100) */
+  taskProgress(card: KanbanCard): number {
+    return card.tasks.length === 0 ? 0 : Math.round((this.completedTaskCount(card) / card.tasks.length) * 100);
+  }
+
   /** 登出系統 */
   logout(): void {
     this.auth.logout();
