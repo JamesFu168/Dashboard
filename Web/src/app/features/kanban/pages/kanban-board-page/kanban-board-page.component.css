@@ -188,6 +188,10 @@ h1 {
   overflow-y: auto;
 }
 
+.column.expanded .card-list {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .kanban-card {
   background: #ffffff;
   border: 1px solid #dae1eb;
@@ -318,5 +322,9 @@ time {
 
   .column {
     min-height: 320px;
+  }
+
+  .column.expanded .card-list {
+    grid-template-columns: 1fr;
   }
 }
