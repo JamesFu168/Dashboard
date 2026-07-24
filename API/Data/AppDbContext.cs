@@ -46,7 +46,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(c => c.Scope).HasConversion<int>();
             entity.Property(c => c.DevOpsUrl).HasMaxLength(1000);
             entity.Property(c => c.CreatedAt).HasPrecision(3);
-            entity.Property(c => c.UpdatedAt).HasPrecision(3).IsConcurrencyToken();
+            entity.Property(c => c.UpdatedAt).HasPrecision(3);
             entity.HasIndex(c => new { c.Status, c.SequenceOrder });
             entity.HasOne(c => c.Owner)
                 .WithMany(u => u.OwnedCards)
@@ -69,7 +69,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(t => t.Title).HasMaxLength(240).IsRequired();
             entity.Property(t => t.DevOpsUrl).HasMaxLength(1000);
             entity.Property(t => t.CreatedAt).HasPrecision(3);
-            entity.Property(t => t.UpdatedAt).HasPrecision(3).IsConcurrencyToken();
+            entity.Property(t => t.UpdatedAt).HasPrecision(3);
             entity.HasIndex(t => new { t.CardId, t.SequenceOrder });
             entity.HasOne(t => t.Assignee)
                 .WithMany(u => u.AssignedTasks)

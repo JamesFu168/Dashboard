@@ -64,7 +64,6 @@ namespace Dashboard.Api.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .IsConcurrencyToken()
                         .HasPrecision(3)
                         .HasColumnType("datetime2(3)");
 
@@ -143,7 +142,6 @@ namespace Dashboard.Api.Migrations
                         .HasColumnType("nvarchar(240)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .IsConcurrencyToken()
                         .HasPrecision(3)
                         .HasColumnType("datetime2(3)");
 
