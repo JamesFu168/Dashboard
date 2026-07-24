@@ -13,6 +13,17 @@
       <input type="date" formControlName="dueDate">
     </label>
 
+    @if (card.scope === CardScope.Organization) {
+      <label class="field">
+        <span>指派給</span>
+        <select formControlName="assigneeId">
+          @for (user of departmentUsers(); track user.id) {
+            <option [ngValue]="user.id">{{ user.name }}</option>
+          }
+        </select>
+      </label>
+    }
+
     @if (errorMessage()) {
       <p class="error">{{ errorMessage() }}</p>
     }

@@ -41,7 +41,9 @@ public sealed class TasksController(
             Id = Guid.NewGuid(),
             CardId = card.Id,
             Title = request.Title.Trim(),
-            AssigneeId = request.AssigneeId,
+            AssigneeId = card.Scope == CardScope.Organization
+                ? request.AssigneeId ?? currentUser.UserId
+                : card.OwnerId,
             SequenceOrder = request.SequenceOrder,
             DueDate = request.DueDate,
             DevOpsUrl = request.DevOpsUrl,
@@ -156,6 +158,11 @@ public sealed class TasksController(
             return Forbid();
         }
 
+        if (card.Scope == CardScope.Personal)
+        {
+            return BadRequest("個人卡片的任務無法指派給他人。");
+        }
+
         if (IsStale(request.UpdatedAt, task.UpdatedAt))
         {
             return Conflict("Task has changed since it was loaded.");
@@ -205,6 +212,7 @@ public sealed class TasksController(
     private async Task<CardTask?> GetTaskWithCard(Guid taskId)
     {
         return await db.CardTasks
+            .IgnoreQueryFilters()
             .Include(task => task.Assignee)
             .Include(task => task.Card)
             .ThenInclude(card => card!.Tasks)

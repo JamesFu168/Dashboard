@@ -16,6 +16,7 @@
       </div>
 
       <button type="button" class="new-card-button" (click)="openCreateCard()">+ 新增卡片</button>
+      <button type="button" class="trash-nav-button" (click)="openTrash()">🗑 垃圾桶</button>
 
       <div class="user-menu">
         <span class="user-name">{{ auth.user()?.name }}</span>
@@ -28,6 +29,7 @@
     @for (column of state.columns(); track column.status) {
       <section
         class="column"
+        [class]="'status-' + column.status"
         [class.expanded]="expandedStatus() === column.status"
         cdkDropList
         [cdkDropListData]="column.cards"
@@ -67,6 +69,14 @@
                     (click)="openEditCard(card)">
                     ✎
                   </button>
+                  <button
+                    type="button"
+                    class="delete-card-button"
+                    aria-label="刪除卡片"
+                    title="刪除卡片"
+                    (click)="deleteCard(card)">
+                    🗑
+                  </button>
                 }
               </div>
 
@@ -77,14 +87,31 @@
 
               <div class="tasks">
                 @for (task of card.tasks; track task.id) {
-                  <label class="task" [class.done]="task.isCompleted">
-                    <input
-                      type="checkbox"
-                      [checked]="task.isCompleted"
-                      [disabled]="!canToggleTask(card, task)"
-                      (change)="toggleTask(task)">
-                    <span>{{ task.title }}</span>
-                  </label>
+                  <div class="task" [class.done]="task.isCompleted">
+                    <label>
+                      <input
+                        type="checkbox"
+                        [checked]="task.isCompleted"
+                        [disabled]="!canToggleTask(card, task)"
+                        (change)="toggleTask(task)">
+                      <span>{{ task.title }}</span>
+                    </label>
+                    @if (card.scope === CardScope.Organization) {
+                      @if (isOwner(card)) {
+                        <select
+                          class="assignee-select"
+                          [value]="task.assigneeId ?? ''"
+                          (change)="assignTask(card, task, $any($event.target).value)">
+                          <option value="">未指派</option>
+                          @for (user of departmentUsers(); track user.id) {
+                            <option [value]="user.id">{{ user.name }}</option>
+                          }
+                        </select>
+                      } @else {
+                        <span class="assignee-name">{{ task.assigneeName ?? '未指派' }}</span>
+                      }
+                    }
+                  </div>
                 }
               </div>
 
@@ -110,5 +137,9 @@
 
   @if (editingCard(); as editTargetCard) {
     <app-card-form-dialog [card]="editTargetCard" (closed)="closeEditCard()" />
+  }
+
+  @if (showTrash()) {
+    <app-trash-dialog (closed)="closeTrash()" />
   }
 </main>

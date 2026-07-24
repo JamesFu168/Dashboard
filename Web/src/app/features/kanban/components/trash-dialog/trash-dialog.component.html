@@ -1,0 +1,31 @@
+<div class="dialog-overlay" (click)="close()">
+  <div class="dialog-card" (click)="$event.stopPropagation()">
+    <h2>垃圾桶</h2>
+
+    @if (state.trash().length === 0) {
+      <p class="empty">垃圾桶目前是空的。</p>
+    } @else {
+      <ul class="trash-list">
+        @for (card of state.trash(); track card.id) {
+          <li class="trash-item">
+            <div class="trash-info">
+              <span class="scope">{{ card.scope === CardScope.Organization ? '組織' : '個人' }}</span>
+              <h3>{{ card.title }}</h3>
+              @if (card.deletedAt) {
+                <time>刪除於 {{ card.deletedAt | date: 'yyyy-MM-dd HH:mm' }}</time>
+              }
+            </div>
+            <div class="trash-actions">
+              <button type="button" class="restore-button" (click)="restore(card.id)">還原</button>
+              <button type="button" class="delete-button" (click)="permanentlyDelete(card.id)">永久刪除</button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-button" (click)="close()">關閉</button>
+    </div>
+  </div>
+</div>

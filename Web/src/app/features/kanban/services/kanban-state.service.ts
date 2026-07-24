@@ -9,10 +9,12 @@ export class KanbanStateService {
   private readonly cardsSignal = signal<KanbanCard[]>([]);
   private readonly loadingSignal = signal(false);
   private readonly viewModeSignal = signal<'personal' | 'organization'>('personal');
+  private readonly trashSignal = signal<KanbanCard[]>([]);
 
   readonly cards = this.cardsSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly viewMode = this.viewModeSignal.asReadonly();
+  readonly trash = this.trashSignal.asReadonly();
   readonly columns = computed(() => [
     this.createColumn(CardStatus.Plan, '規劃'),
     this.createColumn(CardStatus.ToDo, '待辦'),
@@ -28,7 +30,7 @@ export class KanbanStateService {
       .subscribe((cards) => this.cardsSignal.set(cards));
   }
 
-  createCard(title: string, description: string | null, scope: CardScope, dueDate: string | null): Observable<KanbanCard> {
+  createCard(title: string, description: string | null, scope: CardScope, dueDate: string | null, devOpsUrl: string | null): Observable<KanbanCard> {
     const planCards = this.cardsSignal().filter((card) => card.status === CardStatus.Plan);
     const request: CreateCardRequest = {
       title,
@@ -37,7 +39,7 @@ export class KanbanStateService {
       departmentId: null,
       dueDate,
       sequenceOrder: (planCards.length + 1) * 100,
-      devOpsUrl: null
+      devOpsUrl
     };
 
     return this.api.createCard(request).pipe(
@@ -45,19 +47,44 @@ export class KanbanStateService {
     );
   }
 
-  updateCard(card: KanbanCard, title: string, description: string | null, scope: CardScope, dueDate: string | null): Observable<KanbanCard> {
+  updateCard(card: KanbanCard, title: string, description: string | null, scope: CardScope, dueDate: string | null, devOpsUrl: string | null): Observable<KanbanCard> {
     const request: UpdateCardRequest = {
       title,
       description,
       scope,
       departmentId: null,
       dueDate,
-      devOpsUrl: null,
+      devOpsUrl,
       updatedAt: card.updatedAt
     };
 
     return this.api.updateCard(card.id, request).pipe(
       tap((updated) => this.upsertCard(updated))
+    );
+  }
+
+  deleteCard(card: KanbanCard): Observable<void> {
+    return this.api.deleteCard(card.id).pipe(
+      tap(() => this.removeCard(card.id))
+    );
+  }
+
+  loadTrash(): void {
+    this.api.getTrash().subscribe((cards) => this.trashSignal.set(cards));
+  }
+
+  restoreCard(card: KanbanCard): Observable<KanbanCard> {
+    return this.api.restoreCard(card.id).pipe(
+      tap((restored) => {
+        this.trashSignal.update((cards) => cards.filter((item) => item.id !== card.id));
+        this.upsertCard(restored);
+      })
+    );
+  }
+
+  permanentlyDeleteCard(cardId: string): Observable<void> {
+    return this.api.permanentlyDeleteCard(cardId).pipe(
+      tap(() => this.trashSignal.update((cards) => cards.filter((item) => item.id !== cardId)))
     );
   }
 
@@ -75,10 +102,10 @@ export class KanbanStateService {
     });
   }
 
-  createTask(card: KanbanCard, title: string, dueDate: string | null): Observable<CardTask> {
+  createTask(card: KanbanCard, title: string, dueDate: string | null, assigneeId: number | null): Observable<CardTask> {
     const request: CreateTaskRequest = {
       title,
-      assigneeId: null,
+      assigneeId,
       sequenceOrder: (card.tasks.length + 1) * 100,
       dueDate,
       devOpsUrl: null
@@ -88,6 +115,16 @@ export class KanbanStateService {
       tap((task) => {
         this.cardsSignal.update((cards) => cards.map((item) => item.id === card.id
           ? { ...item, tasks: [...item.tasks, task] }
+          : item));
+      })
+    );
+  }
+
+  assignTask(card: KanbanCard, task: CardTask, assigneeId: number | null): Observable<CardTask> {
+    return this.api.assignTask(task.id, { assigneeId, updatedAt: task.updatedAt }).pipe(
+      tap((updatedTask) => {
+        this.cardsSignal.update((cards) => cards.map((item) => item.id === card.id
+          ? { ...item, tasks: item.tasks.map((existing) => existing.id === updatedTask.id ? updatedTask : existing) }
           : item));
       })
     );

@@ -19,6 +19,7 @@ public static class MappingExtensions
             card.DueDate,
             card.SequenceOrder,
             card.DevOpsUrl,
+            card.DeletedAt,
             card.CreatedAt,
             card.UpdatedAt,
             card.Tasks

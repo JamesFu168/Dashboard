@@ -27,7 +27,8 @@ export class CardFormDialogComponent implements OnInit {
     title: ['', Validators.required],
     description: [''],
     scope: [CardScope.Personal, Validators.required],
-    dueDate: ['']
+    dueDate: [''],
+    devOpsUrl: ['']
   });
 
   ngOnInit(): void {
@@ -36,7 +37,8 @@ export class CardFormDialogComponent implements OnInit {
         title: this.card.title,
         description: this.card.description ?? '',
         scope: this.card.scope,
-        dueDate: this.card.dueDate ?? ''
+        dueDate: this.card.dueDate ?? '',
+        devOpsUrl: this.card.devOpsUrl ?? ''
       });
     }
   }
@@ -49,12 +51,13 @@ export class CardFormDialogComponent implements OnInit {
     this.submitting.set(true);
     this.errorMessage.set(null);
 
-    const { title, description, scope, dueDate } = this.form.getRawValue();
+    const { title, description, scope, dueDate, devOpsUrl } = this.form.getRawValue();
     const trimmedTitle = title.trim();
     const trimmedDescription = description.trim();
+    const trimmedDevOpsUrl = devOpsUrl.trim();
     const request$ = this.card
-      ? this.state.updateCard(this.card, trimmedTitle, trimmedDescription, scope, dueDate || null)
-      : this.state.createCard(trimmedTitle, trimmedDescription, scope, dueDate || null);
+      ? this.state.updateCard(this.card, trimmedTitle, trimmedDescription, scope, dueDate || null, trimmedDevOpsUrl || null)
+      : this.state.createCard(trimmedTitle, trimmedDescription, scope, dueDate || null, trimmedDevOpsUrl || null);
 
     request$
       .pipe(finalize(() => this.submitting.set(false)))

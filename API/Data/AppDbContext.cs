@@ -45,9 +45,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(c => c.Status).HasConversion<int>();
             entity.Property(c => c.Scope).HasConversion<int>();
             entity.Property(c => c.DevOpsUrl).HasMaxLength(1000);
+            entity.Property(c => c.IsDeleted).IsRequired().HasDefaultValue(false);
+            entity.Property(c => c.DeletedAt).HasPrecision(3);
             entity.Property(c => c.CreatedAt).HasPrecision(3);
             entity.Property(c => c.UpdatedAt).HasPrecision(3);
             entity.HasIndex(c => new { c.Status, c.SequenceOrder });
+            entity.HasQueryFilter(c => !c.IsDeleted);
             entity.HasOne(c => c.Owner)
                 .WithMany(u => u.OwnedCards)
                 .HasForeignKey(c => c.OwnerId)

@@ -15,6 +15,7 @@ public sealed record CardDto(
     DateOnly? DueDate,
     int SequenceOrder,
     string? DevOpsUrl,
+    DateTime? DeletedAt,
     DateTime CreatedAt,
     DateTime UpdatedAt,
     IReadOnlyCollection<CardTaskDto> Tasks);

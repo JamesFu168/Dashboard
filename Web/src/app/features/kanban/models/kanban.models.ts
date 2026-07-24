@@ -37,9 +37,15 @@ export interface KanbanCard {
   dueDate: string | null;
   sequenceOrder: number;
   devOpsUrl: string | null;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   tasks: CardTask[];
+}
+
+export interface UserSummary {
+  id: number;
+  name: string;
 }
 
 export interface MoveCardRequest {
@@ -74,4 +80,9 @@ export interface CreateTaskRequest {
   sequenceOrder: number;
   dueDate: string | null;
   devOpsUrl: string | null;
+}
+
+export interface AssignTaskRequest {
+  assigneeId: number | null;
+  updatedAt: string | null;
 }

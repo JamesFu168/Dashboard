@@ -17,7 +17,7 @@
 
 .eyebrow {
   color: #60738f;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   margin: 0 0 2px;
   text-transform: uppercase;
@@ -31,7 +31,7 @@ p {
 }
 
 h1 {
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .header-actions {
@@ -63,6 +63,21 @@ h1 {
   background: #2a3b52;
 }
 
+.trash-nav-button {
+  background: #ffffff;
+  border: 1px solid #d5dde8;
+  border-radius: 8px;
+  color: #526277;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+}
+
+.trash-nav-button:hover {
+  background: #f3f6fa;
+}
+
 .user-menu {
   align-items: center;
   display: flex;
@@ -71,7 +86,7 @@ h1 {
 
 .user-name {
   color: #1d2a3a;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -133,6 +148,26 @@ h1 {
   padding: 12px;
 }
 
+.column.status-0 {
+  background: #eef3ff;
+  border-color: #cdd9f7;
+}
+
+.column.status-1 {
+  background: #fff8ea;
+  border-color: #f2e2b8;
+}
+
+.column.status-2 {
+  background: #f4eeff;
+  border-color: #ddccf7;
+}
+
+.column.status-3 {
+  background: #eafaf0;
+  border-color: #bfe6cd;
+}
+
 .column-header {
   align-items: center;
   display: flex;
@@ -143,7 +178,7 @@ h1 {
 }
 
 .column-header h2 {
-  font-size: 16px;
+  font-size: 18px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -154,7 +189,7 @@ h1 {
   background: #d8e0ea;
   border-radius: 999px;
   display: inline-flex;
-  font-size: 12px;
+  font-size: 13px;
   height: 24px;
   justify-content: center;
   min-width: 24px;
@@ -209,12 +244,13 @@ h1 {
 .card-topline {
   align-items: center;
   display: flex;
-  font-size: 12px;
+  font-size: 13px;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 
-.edit-card-button {
+.edit-card-button,
+.delete-card-button {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -223,14 +259,22 @@ h1 {
   font-size: 13px;
   height: 22px;
   line-height: 1;
-  margin-left: auto;
   padding: 0;
   width: 22px;
 }
 
-.edit-card-button:hover {
+.edit-card-button {
+  margin-left: auto;
+}
+
+.edit-card-button:hover,
+.delete-card-button:hover {
   background: #edf1f5;
   border-color: #d5dde8;
+}
+
+.delete-card-button:hover {
+  color: #a02525;
 }
 
 .scope {
@@ -247,14 +291,14 @@ time {
 }
 
 .kanban-card h3 {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.35;
   margin-bottom: 8px;
 }
 
 .kanban-card p {
   color: #526277;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.45;
   margin-bottom: 12px;
 }
@@ -265,18 +309,43 @@ time {
 }
 
 .task {
-  align-items: flex-start;
+  align-items: center;
   color: #364152;
+  display: flex;
+  font-size: 14px;
+  gap: 8px;
+  justify-content: space-between;
+  line-height: 1.35;
+}
+
+.task label {
+  align-items: flex-start;
   display: grid;
-  font-size: 13px;
+  flex: 1 1 auto;
   gap: 8px;
   grid-template-columns: 16px 1fr;
-  line-height: 1.35;
+  min-width: 0;
 }
 
 .task.done span {
   color: #7b8794;
   text-decoration: line-through;
+}
+
+.assignee-select {
+  border: 1px solid #d5dde8;
+  border-radius: 6px;
+  color: #526277;
+  flex: 0 0 auto;
+  font-size: 12px;
+  max-width: 96px;
+  padding: 3px 4px;
+}
+
+.assignee-name {
+  color: #6b7280;
+  flex: 0 0 auto;
+  font-size: 12px;
 }
 
 .add-task-button {
@@ -285,7 +354,7 @@ time {
   border-radius: 6px;
   color: #526277;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 10px;
   padding: 6px 10px;
   width: 100%;

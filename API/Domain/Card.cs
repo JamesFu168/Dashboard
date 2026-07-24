@@ -12,6 +12,8 @@ public sealed class Card
     public DateOnly? DueDate { get; set; }
     public int SequenceOrder { get; set; }
     public string? DevOpsUrl { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

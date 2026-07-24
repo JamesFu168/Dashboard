@@ -171,16 +171,77 @@ public sealed class CardsController(
             return Forbid();
         }
 
-        db.Cards.Remove(card);
+        card.IsDeleted = true;
+        card.DeletedAt = DateTimeProvider.TaiwanNow;
         await db.SaveChangesAsync();
         await PublishAsync("CardDeleted", card);
 
         return NoContent();
     }
 
-    private async Task<Card?> GetCardWithDetails(Guid id)
+    [HttpGet("trash")]
+    public async Task<ActionResult<IReadOnlyCollection<CardDto>>> GetTrash()
     {
-        return await db.Cards
+        var cards = await db.Cards
+            .IgnoreQueryFilters()
+            .Where(card => card.OwnerId == currentUser.UserId && card.IsDeleted)
+            .Include(card => card.Owner)
+            .Include(card => card.Department)
+            .Include(card => card.Tasks)
+            .ThenInclude(task => task.Assignee)
+            .OrderByDescending(card => card.DeletedAt)
+            .ToListAsync();
+
+        return Ok(cards.Select(card => card.ToDto()).ToArray());
+    }
+
+    [HttpPost("{id:guid}/restore")]
+    public async Task<ActionResult<CardDto>> RestoreCard(Guid id)
+    {
+        var card = await GetCardWithDetails(id, ignoreQueryFilters: true);
+        if (card is null || !card.IsDeleted)
+        {
+            return NotFound();
+        }
+
+        if (!authorization.CanEditCard(currentUser.UserId, card))
+        {
+            return Forbid();
+        }
+
+        card.IsDeleted = false;
+        card.DeletedAt = null;
+        await db.SaveChangesAsync();
+        await PublishAsync("CardCreated", card);
+
+        return Ok(card.ToDto());
+    }
+
+    [HttpDelete("{id:guid}/permanent")]
+    public async Task<IActionResult> PermanentlyDeleteCard(Guid id)
+    {
+        var card = await GetCardWithDetails(id, ignoreQueryFilters: true);
+        if (card is null || !card.IsDeleted)
+        {
+            return NotFound();
+        }
+
+        if (!authorization.CanEditCard(currentUser.UserId, card))
+        {
+            return Forbid();
+        }
+
+        db.Cards.Remove(card);
+        await db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private async Task<Card?> GetCardWithDetails(Guid id, bool ignoreQueryFilters = false)
+    {
+        var query = ignoreQueryFilters ? db.Cards.IgnoreQueryFilters() : db.Cards;
+
+        return await query
             .Include(card => card.Owner)
             .Include(card => card.Department)
             .Include(card => card.Tasks)

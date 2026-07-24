@@ -31,6 +31,11 @@
       <input type="date" formControlName="dueDate">
     </label>
 
+    <label class="field">
+      <span>DevOps 連結（選填）</span>
+      <input type="url" formControlName="devOpsUrl" placeholder="https://...">
+    </label>
+
     @if (errorMessage()) {
       <p class="error">{{ errorMessage() }}</p>
     }

@@ -20,32 +20,35 @@
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 20px;
   margin: 0;
 }
 
 .target-card {
   color: #60738f;
-  font-size: 13px;
+  font-size: 14px;
   margin: -8px 0 0;
 }
 
 .field {
   color: #364152;
   display: grid;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   gap: 6px;
 }
 
-.field input {
+.field input,
+.field select {
   border: 1px solid #d5dde8;
   border-radius: 8px;
-  font-size: 14px;
+  font-family: inherit;
+  font-size: 15px;
   padding: 10px 12px;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: #6f8bff;
   outline: none;
 }
@@ -72,7 +75,7 @@ h2 {
   border-radius: 8px;
   color: #526277;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   padding: 11px 14px;
 }
 
@@ -86,7 +89,7 @@ button[type='submit'] {
   border-radius: 8px;
   color: #ffffff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   padding: 11px 14px;
 }
