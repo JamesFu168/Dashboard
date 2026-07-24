@@ -1,0 +1,97 @@
+.dialog-overlay {
+  align-items: center;
+  background: rgba(16, 24, 40, 0.45);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 100;
+}
+
+.dialog-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.24);
+  display: grid;
+  gap: 16px;
+  max-width: 360px;
+  padding: 28px;
+  width: 100%;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.target-card {
+  color: #60738f;
+  font-size: 13px;
+  margin: -8px 0 0;
+}
+
+.field {
+  color: #364152;
+  display: grid;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+}
+
+.field input {
+  border: 1px solid #d5dde8;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.field input:focus {
+  border-color: #6f8bff;
+  outline: none;
+}
+
+.error {
+  background: #fdecec;
+  border: 1px solid #f3b9b9;
+  border-radius: 8px;
+  color: #a02525;
+  font-size: 13px;
+  margin: 0;
+  padding: 8px 12px;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  background: #ffffff;
+  border: 1px solid #d5dde8;
+  border-radius: 8px;
+  color: #526277;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 11px 14px;
+}
+
+.cancel-button:hover {
+  background: #f3f6fa;
+}
+
+button[type='submit'] {
+  background: #1d2a3a;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 14px;
+}
+
+button[type='submit']:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../../auth/services/auth-state.service';
+import { CreateTaskDialogComponent } from '../../components/create-task-dialog/create-task-dialog.component';
 import { CardStatus, CardTask, KanbanCard } from '../../models/kanban.models';
 import { KanbanRealtimeService } from '../../services/kanban-realtime.service';
 import { KanbanStateService } from '../../services/kanban-state.service';
@@ -10,7 +11,7 @@ import { KanbanStateService } from '../../services/kanban-state.service';
 @Component({
   selector: 'app-kanban-board-page',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, CreateTaskDialogComponent],
   templateUrl: './kanban-board-page.component.html',
   styleUrl: './kanban-board-page.component.css'
 })
@@ -21,6 +22,7 @@ export class KanbanBoardPageComponent implements OnInit {
   private readonly router = inject(Router);
 
   protected readonly expandedStatus = signal<CardStatus | null>(null);
+  protected readonly creatingTaskFor = signal<KanbanCard | null>(null);
 
   ngOnInit(): void {
     this.state.load('personal');
@@ -60,5 +62,13 @@ export class KanbanBoardPageComponent implements OnInit {
 
   toggleTask(task: CardTask): void {
     this.state.toggleTask(task);
+  }
+
+  openCreateTask(card: KanbanCard): void {
+    this.creatingTaskFor.set(card);
+  }
+
+  closeCreateTask(): void {
+    this.creatingTaskFor.set(null);
   }
 }

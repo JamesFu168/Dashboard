@@ -241,6 +241,23 @@ time {
   text-decoration: line-through;
 }
 
+.add-task-button {
+  background: transparent;
+  border: 1px dashed #c3cedd;
+  border-radius: 6px;
+  color: #526277;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  width: 100%;
+}
+
+.add-task-button:hover {
+  background: #f3f6fa;
+  border-color: #97a7bd;
+}
+
 @media (max-width: 960px) {
   .board-shell {
     height: auto;

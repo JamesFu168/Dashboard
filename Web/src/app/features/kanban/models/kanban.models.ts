@@ -47,3 +47,11 @@ export interface MoveCardRequest {
   sequenceOrder: number;
   updatedAt: string;
 }
+
+export interface CreateTaskRequest {
+  title: string;
+  assigneeId: number | null;
+  sequenceOrder: number;
+  dueDate: string | null;
+  devOpsUrl: string | null;
+}

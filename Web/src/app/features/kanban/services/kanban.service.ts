@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CardTask, KanbanCard, MoveCardRequest } from '../models/kanban.models';
+import { CardTask, CreateTaskRequest, KanbanCard, MoveCardRequest } from '../models/kanban.models';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -21,5 +21,9 @@ export class KanbanService {
 
   toggleTask(taskId: string): Observable<CardTask> {
     return this.http.patch<CardTask>(`${this.apiBaseUrl}/tasks/${taskId}/toggle`, {});
+  }
+
+  createTask(cardId: string, request: CreateTaskRequest): Observable<CardTask> {
+    return this.http.post<CardTask>(`${this.apiBaseUrl}/cards/${cardId}/tasks`, request);
   }
 }

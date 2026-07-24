@@ -75,10 +75,20 @@
                   </label>
                 }
               </div>
+
+              @if (isOwner(card)) {
+                <button type="button" class="add-task-button" (click)="openCreateTask(card)">
+                  + 新增任務
+                </button>
+              }
             </article>
           }
         </div>
       </section>
     }
   </section>
+
+  @if (creatingTaskFor(); as creatingCard) {
+    <app-create-task-dialog [card]="creatingCard" (closed)="closeCreateTask()" />
+  }
 </main>

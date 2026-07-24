@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { finalize } from 'rxjs';
-import { CardStatus, CardTask, KanbanCard } from '../models/kanban.models';
+import { Observable, finalize, tap } from 'rxjs';
+import { CardStatus, CardTask, CreateTaskRequest, KanbanCard } from '../models/kanban.models';
 import { KanbanService } from './kanban.service';
 
 @Injectable({ providedIn: 'root' })
@@ -40,6 +40,24 @@ export class KanbanStateService {
         tasks: card.tasks.map((item) => item.id === updatedTask.id ? updatedTask : item)
       })));
     });
+  }
+
+  createTask(card: KanbanCard, title: string, dueDate: string | null): Observable<CardTask> {
+    const request: CreateTaskRequest = {
+      title,
+      assigneeId: null,
+      sequenceOrder: (card.tasks.length + 1) * 100,
+      dueDate,
+      devOpsUrl: null
+    };
+
+    return this.api.createTask(card.id, request).pipe(
+      tap((task) => {
+        this.cardsSignal.update((cards) => cards.map((item) => item.id === card.id
+          ? { ...item, tasks: [...item.tasks, task] }
+          : item));
+      })
+    );
   }
 
   upsertCard(card: KanbanCard): void {
