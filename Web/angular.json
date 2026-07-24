@@ -13,12 +13,18 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/dashboard-kanban-web",
+            "outputPath": {
+              "base": "dist/dashboard-kanban-web",
+              "browser": ""
+            },
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/assets"],
+            "assets": [
+              "src/assets",
+              "src/web.config"
+            ],
             "styles": ["src/styles.css"],
             "scripts": []
           }
