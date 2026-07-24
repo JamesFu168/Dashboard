@@ -39,6 +39,8 @@ export interface CardTask {
   devOpsUrl: string | null;
   createdAt: string;
   updatedAt: string;
+  /** 所屬卡片最後更新時間 (用於同步卡片本身的樂觀鎖 updatedAt，避免後續卡片操作誤判 409 衝突) */
+  cardUpdatedAt: string;
 }
 
 /**

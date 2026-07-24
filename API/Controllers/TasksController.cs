@@ -50,6 +50,7 @@ public sealed class TasksController(
         {
             Id = Guid.NewGuid(),
             CardId = card.Id,
+            Card = card,
             Title = request.Title.Trim(),
             AssigneeId = card.Scope == CardScope.Organization
                 ? request.AssigneeId ?? currentUser.UserId

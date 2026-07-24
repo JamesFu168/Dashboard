@@ -37,7 +37,8 @@ public sealed record CardTaskDto(
     DateOnly? DueDate,
     string? DevOpsUrl,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    DateTime CardUpdatedAt);
 
 /// <summary>
 /// 建立卡片請求 DTO。

@@ -137,7 +137,11 @@ export class KanbanStateService {
    */
   moveCard(card: KanbanCard, status: CardStatus, sequenceOrder: number): void {
     this.api.moveCard(card.id, { status, sequenceOrder, updatedAt: card.updatedAt })
-      .subscribe((updated) => this.upsertCard(updated));
+      .subscribe({
+        next: (updated) => this.upsertCard(updated),
+        // 樂觀鎖衝突 (409) 或其他錯誤時，重新載入看板以同步伺服器最新狀態，避免卡片停留在錯誤位置卻無任何提示。
+        error: () => this.load(this.viewModeSignal())
+      });
   }
 
   /**
@@ -145,10 +149,13 @@ export class KanbanStateService {
    */
   toggleTask(task: CardTask): void {
     this.api.toggleTask(task.id).subscribe((updatedTask) => {
-      this.cardsSignal.update((cards) => cards.map((card) => ({
-        ...card,
-        tasks: card.tasks.map((item) => item.id === updatedTask.id ? updatedTask : item)
-      })));
+      this.cardsSignal.update((cards) => cards.map((card) => card.id === updatedTask.cardId
+        ? {
+          ...card,
+          updatedAt: updatedTask.cardUpdatedAt,
+          tasks: card.tasks.map((item) => item.id === updatedTask.id ? updatedTask : item)
+        }
+        : card));
     });
   }
 
@@ -167,7 +174,7 @@ export class KanbanStateService {
     return this.api.createTask(card.id, request).pipe(
       tap((task) => {
         this.cardsSignal.update((cards) => cards.map((item) => item.id === card.id
-          ? { ...item, tasks: [...item.tasks, task] }
+          ? { ...item, updatedAt: task.cardUpdatedAt, tasks: [...item.tasks, task] }
           : item));
       })
     );
@@ -180,7 +187,11 @@ export class KanbanStateService {
     return this.api.assignTask(task.id, { assigneeId, updatedAt: task.updatedAt }).pipe(
       tap((updatedTask) => {
         this.cardsSignal.update((cards) => cards.map((item) => item.id === card.id
-          ? { ...item, tasks: item.tasks.map((existing) => existing.id === updatedTask.id ? updatedTask : existing) }
+          ? {
+            ...item,
+            updatedAt: updatedTask.cardUpdatedAt,
+            tasks: item.tasks.map((existing) => existing.id === updatedTask.id ? updatedTask : existing)
+          }
           : item));
       })
     );

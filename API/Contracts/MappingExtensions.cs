@@ -39,7 +39,7 @@ public static class MappingExtensions
     /// <summary>
     /// 將 CardTask Domain Entity 轉譯為 CardTaskDto。
     /// </summary>
-    /// <param name="task">CardTask 實體</param>
+    /// <param name="task">CardTask 實體 (須已載入 Card 導覽屬性)</param>
     /// <returns>CardTaskDto 傳輸物件</returns>
     public static CardTaskDto ToDto(this CardTask task)
     {
@@ -54,6 +54,7 @@ public static class MappingExtensions
             task.DueDate,
             task.DevOpsUrl,
             task.CreatedAt,
-            task.UpdatedAt);
+            task.UpdatedAt,
+            task.Card!.UpdatedAt);
     }
 }
