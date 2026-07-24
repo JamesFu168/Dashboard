@@ -37,13 +37,14 @@ stages:
               command: 'ci'
               workingDir: '$(workingDirectory)'
 
-          # 3. 編譯 Angular 專案
+          # 3. 編譯 Angular 專案 (main 分支使用 production 環境設定)
           - task: Npm@1
             displayName: 'Build Angular Project'
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
             inputs:
               command: 'custom'
               workingDir: '$(workingDirectory)'
-              customCommand: 'run build'
+              customCommand: 'run build -- --configuration production'
 
           # 4. 壓縮編譯產出為 zip 檔案 (供 Release Deploy Task 讀取 *.zip)
           - task: ArchiveFiles@2

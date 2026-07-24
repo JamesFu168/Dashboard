@@ -2,7 +2,7 @@
   "name": "dashboard-kanban-web",
   "version": "0.1.0",
   "scripts": {
-    "start": "ng serve --host 127.0.0.1 --port 4200",
+    "start": "ng serve --configuration development --host 127.0.0.1 --port 4200",
     "build": "ng build",
     "test": "ng test"
   },

@@ -1,4 +1,4 @@
 export const environment = {
-  apiBaseUrl: 'https://localhost:7000',
-  signalRHubUrl: 'https://localhost:7000/hubs/kanban'
+  apiBaseUrl: 'https://dashboard-api-h2hmchfufwe6dsh9.japaneast-01.azurewebsites.net',
+  signalRHubUrl: 'https://dashboard-api-h2hmchfufwe6dsh9.japaneast-01.azurewebsites.net/hubs/kanban'
 };
