@@ -35,7 +35,11 @@ CREATE INDEX [IX_CARDS_Status_SequenceOrder]
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Id';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'看板卡片主表', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片識別碼 (GUID 主鍵)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Id';
 
 GO
 
@@ -43,50 +47,50 @@ EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片標�
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片描述', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Description';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片詳細描述', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Description';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片狀態', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Status';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片狀態欄位 (0:Plan, 1:ToDo, 2:Doing, 3:Done)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Status';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片範圍', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Scope';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片可見範疇 (0:Personal, 1:Organization)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'Scope';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'負責人識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'OwnerId';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片擁有者識別碼 (外鍵關聯 USERS)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'OwnerId';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'所屬部門識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DepartmentId';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'所屬部門識別碼 (外鍵關聯 DEPARTMENTS，當 Scope=Organization 時有值)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DepartmentId';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'到期日期', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DueDate';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片到期日期', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DueDate';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'顯示排序', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'SequenceOrder';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'於欄位內部的顯示排序次序', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'SequenceOrder';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'Azure DevOps 連結', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DevOpsUrl';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'關聯之 Azure DevOps 工作項目網址', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DevOpsUrl';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'建立時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'CreatedAt';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'是否已軟刪除 (0:否, 1:是，配合全域 Query Filter)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'IsDeleted';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'最後更新時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'UpdatedAt';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'軟刪除時間 (台灣時間 UTC+8)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DeletedAt';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'是否已軟刪除', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'IsDeleted';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'卡片建立時間 (台灣時間 UTC+8)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'CreatedAt';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'軟刪除時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'DeletedAt';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'最後更新時間 (台灣時間 UTC+8，用於樂觀鎖比對)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'CARDS', @level2type = N'COLUMN', @level2name = N'UpdatedAt';
 
 GO

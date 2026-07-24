@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dashboard.Api.Controllers;
 
+/// <summary>
+/// 處理看板卡片 CRUD、狀態拖移、軟刪除與回收桶還原管理之控制器 (Cards Controller)。
+/// </summary>
 [ApiController]
 [Route("api/v1/cards")]
 public sealed class CardsController(
@@ -17,6 +20,11 @@ public sealed class CardsController(
     CardAuthorizationService authorization,
     IHubContext<KanbanHub> hub) : ControllerBase
 {
+    /// <summary>
+    /// 取得當前使用者權限可存取的卡片列表。
+    /// </summary>
+    /// <param name="viewMode">檢視模式 (organization: 組織視角, personal: 個人視角)</param>
+    /// <returns>卡片 DTO 集合</returns>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<CardDto>>> GetCards([FromQuery] string? viewMode)
     {
@@ -33,6 +41,11 @@ public sealed class CardsController(
         return Ok(cards.Select(card => card.ToDto()).ToArray());
     }
 
+    /// <summary>
+    /// 取得單一卡片的詳細資訊與細項 Tasks。
+    /// </summary>
+    /// <param name="id">卡片 GUID</param>
+    /// <returns>卡片詳細資料 DTO</returns>
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<CardDto>> GetCard(Guid id)
     {
@@ -50,6 +63,12 @@ public sealed class CardsController(
         return Ok(card.ToDto());
     }
 
+    /// <summary>
+    /// 建立新的看板卡片。
+    /// 預設將 Owner 設定為當前登入者，並透過 SignalR 廣播異動。
+    /// </summary>
+    /// <param name="request">建立卡片請求 DTO</param>
+    /// <returns>建立成功之卡片 DTO</returns>
     [HttpPost]
     public async Task<ActionResult<CardDto>> CreateCard(CreateCardRequest request)
     {
@@ -84,6 +103,12 @@ public sealed class CardsController(
         return CreatedAtAction(nameof(GetCard), new { id = card.Id }, card.ToDto());
     }
 
+    /// <summary>
+    /// 編輯卡片標題、內容、範疇、到期日與 DevOps 連結 (需要 Owner 權限與樂觀鎖驗證)。
+    /// </summary>
+    /// <param name="id">卡片 GUID</param>
+    /// <param name="request">更新卡片請求 DTO</param>
+    /// <returns>更新後卡片 DTO</returns>
     [HttpPatch("{id:guid}")]
     public async Task<ActionResult<CardDto>> UpdateCard(Guid id, UpdateCardRequest request)
     {
@@ -128,6 +153,12 @@ public sealed class CardsController(
         return Ok(card.ToDto());
     }
 
+    /// <summary>
+    /// 移動卡片至新欄位狀態或調整欄位內部排序 SequenceOrder (僅限 Owner 可操作)。
+    /// </summary>
+    /// <param name="id">卡片 GUID</param>
+    /// <param name="request">移動卡片請求 DTO</param>
+    /// <returns>更新後卡片 DTO</returns>
     [HttpPut("{id:guid}/status")]
     public async Task<ActionResult<CardDto>> MoveCard(Guid id, MoveCardRequest request)
     {
@@ -157,6 +188,11 @@ public sealed class CardsController(
         return Ok(card.ToDto());
     }
 
+    /// <summary>
+    /// 標記軟刪除卡片 (`IsDeleted = true`, `DeletedAt = TaiwanNow`)，移至回收桶 (僅限 Owner)。
+    /// </summary>
+    /// <param name="id">卡片 GUID</param>
+    /// <returns>無內容成功回應 (204 No Content)</returns>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCard(Guid id)
     {
@@ -179,6 +215,10 @@ public sealed class CardsController(
         return NoContent();
     }
 
+    /// <summary>
+    /// 取得當前登入者已被軟刪除的卡片列表 (回收桶專用)。
+    /// </summary>
+    /// <returns>軟刪除卡片 DTO 集合</returns>
     [HttpGet("trash")]
     public async Task<ActionResult<IReadOnlyCollection<CardDto>>> GetTrash()
     {
@@ -195,6 +235,11 @@ public sealed class CardsController(
         return Ok(cards.Select(card => card.ToDto()).ToArray());
     }
 
+    /// <summary>
+    /// 從回收桶還原指定之軟刪除卡片 (`IsDeleted = false`, `DeletedAt = null`)。
+    /// </summary>
+    /// <param name="id">卡片 GUID</param>
+    /// <returns>還原後之卡片 DTO</returns>
     [HttpPost("{id:guid}/restore")]
     public async Task<ActionResult<CardDto>> RestoreCard(Guid id)
     {
@@ -217,6 +262,11 @@ public sealed class CardsController(
         return Ok(card.ToDto());
     }
 
+    /// <summary>
+    /// 從回收桶永久刪除卡片及其關聯之細項 Tasks。
+    /// </summary>
+    /// <param name="id">卡片 GUID</param>
+    /// <returns>無內容成功回應 (204 No Content)</returns>
     [HttpDelete("{id:guid}/permanent")]
     public async Task<IActionResult> PermanentlyDeleteCard(Guid id)
     {
@@ -237,6 +287,9 @@ public sealed class CardsController(
         return NoContent();
     }
 
+    /// <summary>
+    /// 載入包含擁有者、部門與 Task 被指派者細節的卡片資料。
+    /// </summary>
     private async Task<Card?> GetCardWithDetails(Guid id, bool ignoreQueryFilters = false)
     {
         var query = ignoreQueryFilters ? db.Cards.IgnoreQueryFilters() : db.Cards;
@@ -249,6 +302,9 @@ public sealed class CardsController(
             .FirstOrDefaultAsync(card => card.Id == id);
     }
 
+    /// <summary>
+    /// 檢查當前登入者是否具備檢視卡片的權限。
+    /// </summary>
     private bool CanView(Card card)
     {
         return card.OwnerId == currentUser.UserId
@@ -257,11 +313,17 @@ public sealed class CardsController(
                     || card.Tasks.Any(task => task.AssigneeId == currentUser.UserId)));
     }
 
+    /// <summary>
+    /// 檢查請求中的 UpdatedAt 時間戳記是否過期 (樂觀鎖比對)。
+    /// </summary>
     private static bool IsStale(DateTime? requestUpdatedAt, DateTime entityUpdatedAt)
     {
         return requestUpdatedAt is not null && requestUpdatedAt.Value != entityUpdatedAt;
     }
 
+    /// <summary>
+    /// 透過 SignalR 對卡片 Owner 與部門群組廣播即時事件。
+    /// </summary>
     private async Task PublishAsync(string eventName, Card card)
     {
         await hub.Clients.User(card.OwnerId.ToString()).SendAsync(eventName, card.ToDto());

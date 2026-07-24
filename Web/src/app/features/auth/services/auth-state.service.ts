@@ -7,11 +7,17 @@ const ACCESS_TOKEN_KEY = 'dashboard.authToken';
 const REFRESH_TOKEN_KEY = 'dashboard.refreshToken';
 const USER_KEY = 'dashboard.authUser';
 
+/**
+ * 從 LocalStorage 讀取當前儲存的使用者資訊。
+ */
 function readStoredUser(): AuthUser | null {
   const raw = localStorage.getItem(USER_KEY);
   return raw ? JSON.parse(raw) as AuthUser : null;
 }
 
+/**
+ * 將 API 回傳之 LoginResponse 轉換為 AuthUser 結構。
+ */
 function toAuthUser(response: LoginResponse): AuthUser {
   return {
     userId: response.userId,
@@ -22,6 +28,10 @@ function toAuthUser(response: LoginResponse): AuthUser {
   };
 }
 
+/**
+ * 身份驗證狀態管理服務 (AuthStateService)。
+ * 利用 Angular Signals 管理當前 Access Token、Refresh Token 與使用者登入狀態。
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthStateService {
   private readonly api = inject(AuthApiService);
@@ -31,10 +41,18 @@ export class AuthStateService {
   private readonly userSignal = signal<AuthUser | null>(readStoredUser());
   private refreshInFlight$: Observable<string> | null = null;
 
+  /** 當前存取 Token (唯讀 Signal) */
   readonly accessToken = this.accessTokenSignal.asReadonly();
+  /** 當前登入使用者資訊 (唯讀 Signal) */
   readonly user = this.userSignal.asReadonly();
+  /** 是否為已登入狀態 (Computed Signal) */
   readonly isAuthenticated = computed(() => this.accessTokenSignal() !== null);
 
+  /**
+   * 執行登入流程。
+   * @param email 使用者電子郵件
+   * @param password 使用者密碼
+   */
   login(email: string, password: string): Observable<AuthUser> {
     return this.api.login({ email, password }).pipe(
       tap((response) => this.applySession(response)),
@@ -42,6 +60,9 @@ export class AuthStateService {
     );
   }
 
+  /**
+   * 執行登出流程，清除本地 Session 並向後端撤銷 Refresh Token。
+   */
   logout(): void {
     const refreshToken = this.refreshTokenSignal();
     this.clearSession();
@@ -51,6 +72,10 @@ export class AuthStateService {
     }
   }
 
+  /**
+   * 使用 Refresh Token 換發新的 Access Token。
+   * 具備並發請求解鎖 (shareReplay) 機制，避免多個 API 同時 401 時重複觸發 refresh。
+   */
   refreshAccessToken(): Observable<string> {
     if (this.refreshInFlight$) {
       return this.refreshInFlight$;
@@ -76,6 +101,9 @@ export class AuthStateService {
     return this.refreshInFlight$;
   }
 
+  /**
+   * 將登入回應寫入 Signals 與 LocalStorage 持久化儲存。
+   */
   private applySession(response: LoginResponse): void {
     const user = toAuthUser(response);
 
@@ -88,6 +116,9 @@ export class AuthStateService {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 
+  /**
+   * 清除記憶體與 LocalStorage 中的 Session 資料。
+   */
   private clearSession(): void {
     this.accessTokenSignal.set(null);
     this.refreshTokenSignal.set(null);

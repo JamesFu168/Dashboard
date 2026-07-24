@@ -21,24 +21,30 @@ CREATE INDEX [IX_REFRESH_TOKENS_UserId]
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'Refresh Token 識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'Id';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'JWT 重新整理權杖資料表 (Refresh Token)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'使用者識別碼', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'UserId';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'Refresh Token 紀錄識別碼 (GUID 主鍵)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'Id';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'Refresh Token 權杖字串', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'Token';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'所屬使用者識別碼 (外鍵關聯 USERS)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'UserId';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'過期時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'ExpiresAt';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'Refresh Token 加密權杖字串 (唯一索引)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'Token';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'建立時間', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'CreatedAt';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'權杖過期時間 (台灣時間 UTC+8)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'ExpiresAt';
 
 GO
 
-EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'是否已撤銷', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'IsRevoked';
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'權杖建立時間 (台灣時間 UTC+8)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'CreatedAt';
+
+GO
+
+EXEC sys.sp_addextendedproperty @name = N'MS_Description', @value = N'權杖是否已被撤銷 (0:有效, 1:已撤銷)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'REFRESH_TOKENS', @level2type = N'COLUMN', @level2name = N'IsRevoked';
+
+GO

@@ -6,6 +6,10 @@ import { CardScope, KanbanCard, UserSummary } from '../../models/kanban.models';
 import { KanbanService } from '../../services/kanban.service';
 import { KanbanStateService } from '../../services/kanban-state.service';
 
+/**
+ * 新增 Task 任務細項對話框元件 (CreateTaskDialogComponent)。
+ * 提供標題、到期日與被指派成員選單 (僅 Organization 卡片允許指派他人)。
+ */
 @Component({
   selector: 'app-create-task-dialog',
   standalone: true,
@@ -14,7 +18,9 @@ import { KanbanStateService } from '../../services/kanban-state.service';
   styleUrl: './create-task-dialog.component.css'
 })
 export class CreateTaskDialogComponent implements OnInit {
+  /** 所屬卡片標的 */
   @Input({ required: true }) card!: KanbanCard;
+  /** 對話框關閉事件發射器 */
   @Output() closed = new EventEmitter<void>();
 
   protected readonly CardScope = CardScope;
@@ -24,10 +30,14 @@ export class CreateTaskDialogComponent implements OnInit {
   private readonly api = inject(KanbanService);
   private readonly auth = inject(AuthStateService);
 
+  /** 表單送出中狀態 Signal */
   protected readonly submitting = signal(false);
+  /** 錯誤訊息 Signal */
   protected readonly errorMessage = signal<string | null>(null);
+  /** 可供指派之部門成員列表 */
   protected readonly departmentUsers = signal<UserSummary[]>([]);
 
+  /** 細項 Task 表單控制項 */
   protected readonly form = this.fb.nonNullable.group({
     title: ['', Validators.required],
     dueDate: [''],
@@ -40,6 +50,7 @@ export class CreateTaskDialogComponent implements OnInit {
     }
   }
 
+  /** 送出新增 Task 表單 */
   submit(): void {
     if (this.form.invalid || this.submitting()) {
       return;
@@ -58,6 +69,7 @@ export class CreateTaskDialogComponent implements OnInit {
       });
   }
 
+  /** 取消並關閉對話框 */
   cancel(): void {
     this.closed.emit();
   }
