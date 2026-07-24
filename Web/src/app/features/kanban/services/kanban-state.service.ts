@@ -14,10 +14,10 @@ export class KanbanStateService {
   readonly loading = this.loadingSignal.asReadonly();
   readonly viewMode = this.viewModeSignal.asReadonly();
   readonly columns = computed(() => [
-    this.createColumn(CardStatus.Plan, 'Plan'),
-    this.createColumn(CardStatus.ToDo, 'To Do'),
-    this.createColumn(CardStatus.Doing, 'Doing'),
-    this.createColumn(CardStatus.Done, 'Done')
+    this.createColumn(CardStatus.Plan, '規劃'),
+    this.createColumn(CardStatus.ToDo, '待辦'),
+    this.createColumn(CardStatus.Doing, '進行中'),
+    this.createColumn(CardStatus.Done, '完成')
   ]);
 
   load(viewMode = this.viewModeSignal()): void {

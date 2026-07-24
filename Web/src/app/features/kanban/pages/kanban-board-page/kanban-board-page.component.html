@@ -1,37 +1,46 @@
 <main class="board-shell">
   <header class="board-header">
     <div>
-      <p class="eyebrow">Kanban Dashboard</p>
-      <h1>Work board</h1>
+      <p class="eyebrow">看板儀表板</p>
+      <h1>工作看板</h1>
     </div>
 
     <div class="header-actions">
-      <div class="view-switch" aria-label="View mode">
+      <div class="view-switch" aria-label="檢視模式">
         <button type="button" [class.active]="state.viewMode() === 'personal'" (click)="setViewMode('personal')">
-          Personal
+          個人
         </button>
         <button type="button" [class.active]="state.viewMode() === 'organization'" (click)="setViewMode('organization')">
-          Organization
+          組織
         </button>
       </div>
 
       <div class="user-menu">
         <span class="user-name">{{ auth.user()?.name }}</span>
-        <button type="button" class="logout-button" (click)="logout()">Logout</button>
+        <button type="button" class="logout-button" (click)="logout()">登出</button>
       </div>
     </div>
   </header>
 
-  <section class="columns" [class.loading]="state.loading()">
+  <section class="columns" [class.loading]="state.loading()" [class.has-expanded]="expandedStatus() !== null">
     @for (column of state.columns(); track column.status) {
       <section
         class="column"
+        [class.expanded]="expandedStatus() === column.status"
         cdkDropList
         [cdkDropListData]="column.cards"
         (cdkDropListDropped)="drop($event, column.status)">
         <header class="column-header">
           <h2>{{ column.title }}</h2>
           <span>{{ column.cards.length }}</span>
+          <button
+            type="button"
+            class="expand-toggle"
+            [attr.aria-label]="expandedStatus() === column.status ? '收合為四欄' : '放大此欄'"
+            [title]="expandedStatus() === column.status ? '收合為四欄' : '放大此欄'"
+            (click)="toggleExpand(column.status)">
+            {{ expandedStatus() === column.status ? '⤡' : '⤢' }}
+          </button>
         </header>
 
         <div class="card-list">
@@ -43,7 +52,7 @@
               [cdkDragDisabled]="!isOwner(card)"
               [class.readonly]="!isOwner(card)">
               <div class="card-topline">
-                <span class="scope">{{ card.scope === 1 ? 'Org' : 'Personal' }}</span>
+                <span class="scope">{{ card.scope === 1 ? '組織' : '個人' }}</span>
                 @if (card.dueDate) {
                   <time>{{ card.dueDate }}</time>
                 }

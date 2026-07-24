@@ -1,6 +1,6 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../../auth/services/auth-state.service';
 import { CardStatus, CardTask, KanbanCard } from '../../models/kanban.models';
@@ -20,6 +20,8 @@ export class KanbanBoardPageComponent implements OnInit {
   private readonly realtime = inject(KanbanRealtimeService);
   private readonly router = inject(Router);
 
+  protected readonly expandedStatus = signal<CardStatus | null>(null);
+
   ngOnInit(): void {
     this.state.load('personal');
     void this.realtime.connect(this.auth.user()?.departmentId ?? 1);
@@ -27,6 +29,10 @@ export class KanbanBoardPageComponent implements OnInit {
 
   setViewMode(viewMode: 'personal' | 'organization'): void {
     this.state.load(viewMode);
+  }
+
+  toggleExpand(status: CardStatus): void {
+    this.expandedStatus.update((current) => current === status ? null : status);
   }
 
   isOwner(card: KanbanCard): boolean {
