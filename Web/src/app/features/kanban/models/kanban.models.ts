@@ -48,6 +48,26 @@ export interface MoveCardRequest {
   updatedAt: string;
 }
 
+export interface CreateCardRequest {
+  title: string;
+  description: string | null;
+  scope: CardScope;
+  departmentId: number | null;
+  dueDate: string | null;
+  sequenceOrder: number;
+  devOpsUrl: string | null;
+}
+
+export interface UpdateCardRequest {
+  title: string | null;
+  description: string | null;
+  scope: CardScope | null;
+  departmentId: number | null;
+  dueDate: string | null;
+  devOpsUrl: string | null;
+  updatedAt: string | null;
+}
+
 export interface CreateTaskRequest {
   title: string;
   assigneeId: number | null;

@@ -48,6 +48,21 @@ h1 {
   padding: 3px;
 }
 
+.new-card-button {
+  background: #1d2a3a;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+}
+
+.new-card-button:hover {
+  background: #2a3b52;
+}
+
 .user-menu {
   align-items: center;
   display: flex;
@@ -193,6 +208,25 @@ h1 {
   font-size: 12px;
   justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.edit-card-button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #60738f;
+  cursor: pointer;
+  font-size: 13px;
+  height: 22px;
+  line-height: 1;
+  margin-left: auto;
+  padding: 0;
+  width: 22px;
+}
+
+.edit-card-button:hover {
+  background: #edf1f5;
+  border-color: #d5dde8;
 }
 
 .scope {

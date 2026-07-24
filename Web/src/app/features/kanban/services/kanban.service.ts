@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CardTask, CreateTaskRequest, KanbanCard, MoveCardRequest } from '../models/kanban.models';
+import { CardTask, CreateCardRequest, CreateTaskRequest, KanbanCard, MoveCardRequest, UpdateCardRequest } from '../models/kanban.models';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -13,6 +13,14 @@ export class KanbanService {
     return this.http.get<KanbanCard[]>(`${this.apiBaseUrl}/cards`, {
       params: { viewMode }
     });
+  }
+
+  createCard(request: CreateCardRequest): Observable<KanbanCard> {
+    return this.http.post<KanbanCard>(`${this.apiBaseUrl}/cards`, request);
+  }
+
+  updateCard(cardId: string, request: UpdateCardRequest): Observable<KanbanCard> {
+    return this.http.patch<KanbanCard>(`${this.apiBaseUrl}/cards/${cardId}`, request);
   }
 
   moveCard(cardId: string, request: MoveCardRequest): Observable<KanbanCard> {

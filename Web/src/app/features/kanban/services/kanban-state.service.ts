@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, finalize, tap } from 'rxjs';
-import { CardStatus, CardTask, CreateTaskRequest, KanbanCard } from '../models/kanban.models';
+import { CardScope, CardStatus, CardTask, CreateCardRequest, CreateTaskRequest, KanbanCard, UpdateCardRequest } from '../models/kanban.models';
 import { KanbanService } from './kanban.service';
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +26,39 @@ export class KanbanStateService {
     this.api.getCards(viewMode)
       .pipe(finalize(() => this.loadingSignal.set(false)))
       .subscribe((cards) => this.cardsSignal.set(cards));
+  }
+
+  createCard(title: string, description: string | null, scope: CardScope, dueDate: string | null): Observable<KanbanCard> {
+    const planCards = this.cardsSignal().filter((card) => card.status === CardStatus.Plan);
+    const request: CreateCardRequest = {
+      title,
+      description,
+      scope,
+      departmentId: null,
+      dueDate,
+      sequenceOrder: (planCards.length + 1) * 100,
+      devOpsUrl: null
+    };
+
+    return this.api.createCard(request).pipe(
+      tap((card) => this.upsertCard(card))
+    );
+  }
+
+  updateCard(card: KanbanCard, title: string, description: string | null, scope: CardScope, dueDate: string | null): Observable<KanbanCard> {
+    const request: UpdateCardRequest = {
+      title,
+      description,
+      scope,
+      departmentId: null,
+      dueDate,
+      devOpsUrl: null,
+      updatedAt: card.updatedAt
+    };
+
+    return this.api.updateCard(card.id, request).pipe(
+      tap((updated) => this.upsertCard(updated))
+    );
   }
 
   moveCard(card: KanbanCard, status: CardStatus, sequenceOrder: number): void {

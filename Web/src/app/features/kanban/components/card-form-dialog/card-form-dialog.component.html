@@ -1,0 +1,45 @@
+<div class="dialog-overlay" (click)="cancel()">
+  <form class="dialog-card" [formGroup]="form" (ngSubmit)="submit()" (click)="$event.stopPropagation()">
+    <h2>{{ card ? '編輯卡片' : '新增卡片' }}</h2>
+
+    <label class="field">
+      <span>卡片標題</span>
+      <input type="text" formControlName="title" placeholder="輸入卡片標題" autofocus>
+    </label>
+
+    <label class="field">
+      <span>說明（選填）</span>
+      <textarea formControlName="description" rows="3" placeholder="輸入卡片說明"></textarea>
+    </label>
+
+    <div class="field">
+      <span>範圍</span>
+      <div class="scope-switch">
+        <label [class.active]="form.value.scope === CardScope.Personal">
+          <input type="radio" formControlName="scope" [value]="CardScope.Personal">
+          個人
+        </label>
+        <label [class.active]="form.value.scope === CardScope.Organization">
+          <input type="radio" formControlName="scope" [value]="CardScope.Organization">
+          組織
+        </label>
+      </div>
+    </div>
+
+    <label class="field">
+      <span>截止日期（選填）</span>
+      <input type="date" formControlName="dueDate">
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-button" (click)="cancel()">取消</button>
+      <button type="submit" [disabled]="form.invalid || submitting()">
+        {{ submitting() ? (card ? '更新中…' : '新增中…') : (card ? '更新卡片' : '新增卡片') }}
+      </button>
+    </div>
+  </form>
+</div>
